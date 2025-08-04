@@ -2,22 +2,24 @@ import { scale, verticalScale } from "@/utils/styling";
 
 export const colors = {
   // Primary Theme Colors
-  primary: "#3B82F6",         // Light blue (main accent)
-  primaryLight: "#93C5FD",    // Lighter blue (hover states)
-  primaryDark: "#1D4ED8",     // Deeper blue (pressed/active)
+  black:"black",
+  white: "#FFFFFF",
+  primary: "#3B82F6", // Light blue (main accent)
+  primaryLight: "#93C5FD", // Lighter blue (hover states)
+  primaryDark: "#1D4ED8", // Deeper blue (pressed/active)
 
   // Base Text Colors
-  text: "#1E293B",            // Slate-800 (dark text)
-  textLight: "#64748B",       // Slate-500 (secondary text)
+  text: "#1E293B", // Slate-800 (dark text)
+  textLight: "#64748B", // Slate-500 (secondary text)
 
   // Backgrounds
-  background: "#ffffff",      // Main background
+  background: "#ffffff", // Main background
   backgroundLight: "#f8fafc", // Light background sections
 
   // Accent Colors
-  success: "#16a34a",         // Green (e.g., for successful payments)
-  error: "#ef4444",           // Red (for errors)
-  warning: "#facc15",         // Yellow (alerts, limited offers)
+  success: "#16a34a", // Green (e.g., for successful payments)
+  error: "#ef4444", // Red (for errors)
+  warning: "#facc15", // Yellow (alerts, limited offers)
 
   // Neutrals (for borders, cards, muted text)
   neutral100: "#f1f5f9",
@@ -26,7 +28,6 @@ export const colors = {
   neutral500: "#64748B",
   neutral800: "#1e293b",
 };
-
 
 export const spacingX = {
   _3: scale(3),
@@ -68,4 +69,3 @@ export const radius = {
   _20: verticalScale(20),
   _30: verticalScale(30),
 };
-

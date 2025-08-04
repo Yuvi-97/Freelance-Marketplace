@@ -9,7 +9,7 @@ export default function Index() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/'); 
+      router.replace('/welcome'); 
     }, 2000);
 
     return () => clearTimeout(timer); 
@@ -29,7 +29,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral100, // optional: add white or your theme bg
+    backgroundColor: colors.neutral100, 
     justifyContent: "center",
     alignItems: "center",
   },
