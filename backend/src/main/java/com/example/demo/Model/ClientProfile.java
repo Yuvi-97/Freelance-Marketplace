@@ -19,6 +19,7 @@ public class ClientProfile {
     private String company;
     private String contactEmail;
     private String phone;
+    private String profileUrl;
     @OneToMany(mappedBy = "client")
     private List<Project> postedProjects;
     

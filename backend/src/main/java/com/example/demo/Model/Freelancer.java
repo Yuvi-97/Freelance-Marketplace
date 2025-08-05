@@ -30,6 +30,7 @@ public class Freelancer {
     private Double hourlyRate;
     private String bio;
     private LocalDate joinedDate;
+    private String profileUrl;
     @OneToMany(mappedBy = "assignedFreelancer")
     private List<Project> projects;
 
