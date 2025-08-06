@@ -20,10 +20,11 @@ public class ClientProfile {
     private String contactEmail;
     private String phone;
     private String profileUrl;
-    @OneToMany(mappedBy = "client")
-    private List<Project> postedProjects;
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Project> projects;
+
     
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 }

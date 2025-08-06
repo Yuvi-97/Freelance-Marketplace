@@ -79,4 +79,19 @@ public class UserService {
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
+    
+    public boolean deleteUserById(Long userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            clientRepo.findByUser(user).ifPresent(clientRepo::delete);
+
+            freelancerRepo.findByUser(user).ifPresent(freelancerRepo::delete);
+
+            userRepository.delete(user);
+            return true;
+        }
+        return false;
+    }
 }
