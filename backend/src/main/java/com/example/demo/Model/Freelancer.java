@@ -32,7 +32,7 @@ public class Freelancer {
     private String bio;
     private LocalDate joinedDate;
     private String profileUrl;
-    @OneToMany(mappedBy = "assignedFreelancer")
+    @OneToMany(mappedBy = "assignedFreelancer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects;
 
     @OneToOne
