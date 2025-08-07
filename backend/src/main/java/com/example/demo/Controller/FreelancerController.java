@@ -28,4 +28,16 @@ public class FreelancerController {
     public Freelancer getFreelancer(@PathVariable Long id) {
         return freelancerService.getFreelancerById(id);
     }
+
+    @GetMapping("/search")
+    public List<Freelancer> searchFreelancersByUsername(@RequestParam String username) {
+        return freelancerService.searchFreelancersByUsername(username);
+    }
+
+    @GetMapping("/rate")
+    public List<Freelancer> getFreelancersByHourlyRateRange(
+            @RequestParam Double min,
+            @RequestParam Double max) {
+        return freelancerService.getFreelancersByHourlyRateRange(min, max);
+    }
 }

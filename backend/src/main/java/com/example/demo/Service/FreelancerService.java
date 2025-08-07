@@ -37,4 +37,12 @@ public class FreelancerService {
             return freelancerRepository.save(freelancer);
         }).orElse(null);
     }
+
+    public List<Freelancer> searchFreelancersByUsername(String username) {
+        return freelancerRepository.findByUsernameLike(username);
+    }
+
+    public List<Freelancer> getFreelancersByHourlyRateRange(Double min, Double max) {
+        return freelancerRepository.findByHourlyRateBetween(min, max);
+    }
 }
