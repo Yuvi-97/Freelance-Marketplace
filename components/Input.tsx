@@ -12,7 +12,7 @@ const Input = (props: InputProps) => {
       {props.icon && props.icon}
       <TextInput
         style={[styles.input, props.inputStyle]}
-        placeholderTextColor={colors.neutral400}
+        placeholderTextColor={colors.black}
         ref={props.inputRef && props.inputRef}
         {...props}
       />
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: colors.white,
+    color: colors.black,
     fontSize: verticalScale(14),
   },
 });

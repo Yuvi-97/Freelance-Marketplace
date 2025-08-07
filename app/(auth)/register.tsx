@@ -26,6 +26,11 @@ export default function Register() {
   const experienceRef = useRef("");
   const rateRef = useRef("");
 
+  // Client-specific fields
+  const companyRef = useRef("");
+  const phoneRef = useRef("");
+  const profileUrlRef = useRef("");
+
   const handleSubmit = async () => {
     if (!nameRef.current || !emailRef.current || !passwordRef.current) {
       Alert.alert("Register", "Please fill all the required fields");
@@ -40,31 +45,45 @@ export default function Register() {
       return;
     }
 
+    if (
+      role === "client" &&
+      (!companyRef.current || !phoneRef.current || !profileUrlRef.current)
+    ) {
+      Alert.alert("Register", "Please fill all client details");
+      return;
+    }
+
     setIsLoading(true);
 
-    const body =
-      role === "client"
-        ? {
-            name: nameRef.current,
-            email: emailRef.current,
-            password: passwordRef.current,
-          }
-        : {
-            name: nameRef.current,
-            email: emailRef.current,
-            password: passwordRef.current,
-            skills: skillsRef.current,
-            experience: experienceRef.current,
-            hourlyRate: rateRef.current,
-          };
+    // Build the request body for both roles
+    let body: any = {
+      username: emailRef.current,
+      password: passwordRef.current,
+      role: role?.toUpperCase(),
+      email: emailRef.current,
+    };
 
-    const endpoint =
-      role === "client"
-        ? "http://<YOUR_BACKEND_URL>/api/clients/register"
-        : "http://<YOUR_BACKEND_URL>/api/freelancers/register";
+    if (role === "client") {
+      body = {
+        ...body,
+        clientName: nameRef.current,
+        company: companyRef.current,
+        phone: phoneRef.current,
+        profileUrl: profileUrlRef.current,
+      };
+    } else if (role === "freelancer") {
+      body = {
+        ...body,
+        name: nameRef.current,
+        skills: skillsRef.current,
+        hourlyRate: parseFloat(rateRef.current),
+        bio: experienceRef.current,
+        profileUrl: profileUrlRef.current,
+      };
+    }
 
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch("http://172.16.80.158:8080/api/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,13 +94,13 @@ export default function Register() {
       const data = await res.json();
       setIsLoading(false);
 
-      if (!res.ok || !data.success) {
+      if (!res.ok) {
         Alert.alert("Error", data.msg || "Something went wrong");
         return;
       }
 
       Alert.alert("Success", "Registered successfully");
-      router.replace("/(auth)/login"); // or dashboard
+      router.replace("/(auth)/login");
     } catch (error) {
       setIsLoading(false);
       console.error(error);
@@ -174,44 +193,93 @@ export default function Register() {
                       />
                     }
                   />
-                </>
-              )}
 
-              {role === "freelancer" && (
-                <>
-                  <Input
-                    placeholder="Skills (e.g., React, Java)"
-                    onChangeText={(val) => (skillsRef.current = val)}
-                    icon={
-                      <Icons.Code
-                        size={26}
-                        color={colors.neutral300}
-                        weight="fill"
+                  {role === "client" && (
+                    <>
+                      <Input
+                        placeholder="Company"
+                        onChangeText={(val) => (companyRef.current = val)}
+                        icon={
+                          <Icons.Buildings
+                            size={26}
+                            color={colors.neutral300}
+                            weight="fill"
+                          />
+                        }
                       />
-                    }
-                  />
-                  <Input
-                    placeholder="Experience (e.g., 2 years)"
-                    onChangeText={(val) => (experienceRef.current = val)}
-                    icon={
-                      <Icons.Briefcase
-                        size={26}
-                        color={colors.neutral300}
-                        weight="fill"
+                      <Input
+                        placeholder="Phone"
+                        onChangeText={(val) => (phoneRef.current = val)}
+                        icon={
+                          <Icons.Phone
+                            size={26}
+                            color={colors.neutral300}
+                            weight="fill"
+                          />
+                        }
                       />
-                    }
-                  />
-                  <Input
-                    placeholder="Hourly Rate"
-                    onChangeText={(val) => (rateRef.current = val)}
-                    icon={
-                      <Icons.CurrencyDollar
-                        size={26}
-                        color={colors.neutral300}
-                        weight="fill"
+                      <Input
+                        placeholder="Profile URL"
+                        onChangeText={(val) => (profileUrlRef.current = val)}
+                        icon={
+                          <Icons.Link
+                            size={26}
+                            color={colors.neutral300}
+                            weight="fill"
+                          />
+                        }
                       />
-                    }
-                  />
+                    </>
+                  )}
+
+                  {role === "freelancer" && (
+                    <>
+                      <Input
+                        placeholder="Skills (e.g., React, Java)"
+                        onChangeText={(val) => (skillsRef.current = val)}
+                        icon={
+                          <Icons.Code
+                            size={26}
+                            color={colors.neutral300}
+                            weight="fill"
+                          />
+                        }
+                      />
+                      <Input
+                        placeholder="Experience (e.g., 2 years)"
+                        onChangeText={(val) => (experienceRef.current = val)}
+                        icon={
+                          <Icons.Briefcase
+                            size={26}
+                            color={colors.neutral300}
+                            weight="fill"
+                          />
+                        }
+                      />
+                      <Input
+                        placeholder="Hourly Rate"
+                        onChangeText={(val) => (rateRef.current = val)}
+                        icon={
+                          <Icons.CurrencyDollar
+                            size={26}
+                            color={colors.neutral300}
+                            weight="fill"
+                          />
+                        }
+                      />
+                      <Input
+                        placeholder="Profile URL"
+                        onChangeText={(val) => (profileUrlRef.current = val)}
+                        icon={
+                          <Icons.Link
+                            size={26}
+                            color={colors.neutral300}
+                            weight="fill"
+                          />
+                        }
+                      />
+                    </>
+                  )}
                 </>
               )}
 

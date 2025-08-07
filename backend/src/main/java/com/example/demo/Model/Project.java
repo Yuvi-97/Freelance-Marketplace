@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -22,10 +24,12 @@ public class Project {
     private String status; 
     private LocalDate createdDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "freelancer_id")
     private Freelancer assignedFreelancer;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "client_id")
     private ClientProfile client;

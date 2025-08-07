@@ -3,6 +3,9 @@ package com.example.demo.Controller;
 import com.example.demo.Model.*;
 import com.example.demo.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +18,7 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
-    @GetMapping
+    @GetMapping("/all")
     public List<Project> getAllProjects() {
         return projectService.getAllProjects();
     }
@@ -55,5 +58,28 @@ public class ProjectController {
     @GetMapping("/freelancer/{freelancerId}")
     public List<Project> getProjectsByFreelancerId(@PathVariable Long freelancerId) {
         return projectService.getProjectsByFreelancerId(freelancerId);
+    }
+
+    @PutMapping("/{projectId}/accept")
+    public ResponseEntity<Project> acceptProject(
+            @PathVariable Long projectId,
+            @RequestParam Long freelancerId) {
+        try {
+            Project updatedProject = projectService.assignFreelancerToProject(projectId, freelancerId);
+            return ResponseEntity.ok(updatedProject);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    @GetMapping("/budget")
+    public List<Project> getProjectsByBudgetRange(
+            @RequestParam Double min,
+            @RequestParam Double max) {
+        return projectService.getProjectsByRange(min, max);
+    }
+    @GetMapping
+    public Page<Project> getAllProjects(@PageableDefault(size = 10) Pageable pageable) {
+        return projectService.getAllProjects(pageable);
     }
 }
