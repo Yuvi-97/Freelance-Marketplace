@@ -1,6 +1,6 @@
 import heroBackground from "../assets/hero-background.jpg";
-import Button from "../component/ui/Button.js";
-import Card from "../component/ui/Card.js";
+import Button from "../component/ui/Button.jsx";
+import Card from "../component/ui/Card.jsx";
 
 function Main() {
   return (

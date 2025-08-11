@@ -1,10 +1,14 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import { colors, spacingY, spacingX } from "@/constants/theme";
-import Typo from "@/components/Typo";
+import ScreenWrapper from "@/ReactNativeFrontend/components/ScreenWrapper";
+import {
+  colors,
+  spacingY,
+  spacingX,
+} from "@/ReactNativeFrontend/constants/theme";
+import Typo from "@/ReactNativeFrontend/components/Typo";
 import { verticalScale } from "@/utils/styling";
-import Button from "@/components/Button";
+import Button from "@/ReactNativeFrontend/components/Button";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 

@@ -1,13 +1,17 @@
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import React, { useRef, useState } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Typo from "@/components/Typo";
-import BackButton from "@/components/BackButton";
-import { colors, spacingX, spacingY } from "@/constants/theme";
-import Input from "@/components/Input";
+import ScreenWrapper from "@/ReactNativeFrontend/components/ScreenWrapper";
+import Typo from "@/ReactNativeFrontend/components/Typo";
+import BackButton from "@/ReactNativeFrontend/components/BackButton";
+import {
+  colors,
+  spacingX,
+  spacingY,
+} from "@/ReactNativeFrontend/constants/theme";
+import Input from "@/ReactNativeFrontend/components/Input";
 import * as Icons from "phosphor-react-native";
 import { verticalScale } from "@/utils/styling";
-import Button from "@/components/Button";
+import Button from "@/ReactNativeFrontend/components/Button";
 import { useRouter } from "expo-router";
 import { ScrollView } from "react-native";
 

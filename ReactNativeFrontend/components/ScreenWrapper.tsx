@@ -7,8 +7,8 @@ import {
   View,
 } from "react-native";
 import React from "react";
-import { ScreenWrapperProps } from "@/types";
-import { colors } from "@/constants/theme";
+import { ScreenWrapperProps } from "@/ReactNativeFrontend/types";
+import { colors } from "@/ReactNativeFrontend/constants/theme";
 const { height } = Dimensions.get("window");
 export default function ScreenWrapper({ style, children }: ScreenWrapperProps) {
   let paddingTop = Platform.OS === "ios" ? height * 0.06 : 50;

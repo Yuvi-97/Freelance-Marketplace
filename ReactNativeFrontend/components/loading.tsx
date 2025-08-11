@@ -5,7 +5,7 @@ import {
   View,
 } from "react-native";
 import React from "react";
-import { colors } from "@/constants/theme";
+import { colors } from "@/ReactNativeFrontend/constants/theme";
 
 const Loading = ({
   size = "large",
