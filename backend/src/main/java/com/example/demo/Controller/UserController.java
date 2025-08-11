@@ -1,8 +1,12 @@
 package com.example.demo.Controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,32 +21,26 @@ import com.example.demo.Model.User;
 import com.example.demo.Service.UserService;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.UpdateUserRequest;
+import com.example.demo.security.JwtUtil;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+    @Autowired
+    private JwtUtil jwtutil;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        User user = userService.registerUser(request);
-        return ResponseEntity.ok("User registered as " + user.getRole());
+
+    @GetMapping("/all")
+    public List<User> getAllUser(){
+        return userService.getAllUser();
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String username,
-                                   @RequestParam String password) {
-        User user = userService.login(username, password);
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-        }
-
-        return ResponseEntity.ok("Login successful as " + user.getRole());
-    }
-
+    
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {
         return userService.getUserById(id).orElse(null);

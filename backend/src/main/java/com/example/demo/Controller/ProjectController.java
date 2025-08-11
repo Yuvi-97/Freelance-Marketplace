@@ -78,6 +78,7 @@ public class ProjectController {
             @RequestParam Double max) {
         return projectService.getProjectsByRange(min, max);
     }
+
     @GetMapping
     public Page<Project> getAllProjects(@PageableDefault(size = 10) Pageable pageable) {
         return projectService.getAllProjects(pageable);
