@@ -12,8 +12,6 @@ import com.example.demo.dto.RegisterRequest;
 import com.example.demo.security.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

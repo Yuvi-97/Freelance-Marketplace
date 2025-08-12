@@ -4,21 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import com.example.demo.Model.ClientProfile;
-import com.example.demo.Model.Freelancer;
 import com.example.demo.Model.User;
 import com.example.demo.Repository.ClientProfileRepository;
 import com.example.demo.Repository.FreelancerRepository;
 import com.example.demo.Repository.UserRepository;
-import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.UpdateUserRequest;
 
 @Service
