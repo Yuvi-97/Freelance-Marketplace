@@ -35,18 +35,27 @@ public class AuthService {
 
         
 
-    public LoginResponse login(LoginRequest request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
+public LoginResponse login(LoginRequest request) {
+    try {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+        );
 
-            String token = jwtUtil.generateToken(authentication.getName());
-            return new LoginResponse(token);
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid username or password");
-        }
+        String username = authentication.getName();
+
+        // Fetch user from DB
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String token = jwtUtil.generateToken(username);
+
+        return new LoginResponse(token, user.getId());
+
+    } catch (AuthenticationException e) {
+        throw new RuntimeException("Invalid username or password");
     }
+}
+
 
     public User registerUser(RegisterRequest request) {
         User user = new User();

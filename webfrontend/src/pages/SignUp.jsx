@@ -1,9 +1,14 @@
 import { useState } from "react";
 import bgImage from "../assets/authbg.jpeg";
 import Button from "../component/ui/Button";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-function SignUp() {
+function SignUp({ onUserLoggedIn }) {
   const [role, setRole] = useState("CLIENT");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -23,13 +28,16 @@ function SignUp() {
 
   const handleRoleChange = (newRole) => setRole(newRole);
 
-  const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     let payload = {
       username: form.username,
       password: form.password,
       role,
     };
+
     if (role === "CLIENT") {
       payload = {
         ...payload,
@@ -49,7 +57,18 @@ function SignUp() {
         phone: form.phone,
       };
     }
-    alert(JSON.stringify(payload, null, 2));
+
+    try {
+      const res = await axios.post("http://localhost:8080/auth/signup", payload);
+      console.log("Signup success:", res.data);
+
+      navigate("/login"); 
+    } catch (err) {
+      console.error("Signup error:", err);
+      alert("Failed to sign up. Please try again.");
+    }finally{
+      setLoading(false);
+    }
   };
 
   return (
@@ -96,7 +115,6 @@ function SignUp() {
         </div>
       </div>
 
-      {/* Right Side: Form */}
       <div className="w-1/2 flex items-center justify-center relative z-10 p-8">
         <form
           onSubmit={handleSubmit}
@@ -104,7 +122,6 @@ function SignUp() {
         >
           <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
 
-          {/* Username + Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block mb-1 font-medium" htmlFor="username">
@@ -286,13 +303,37 @@ function SignUp() {
             </>
           )}
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-lg py-2 mt-4"
-          >
-            Sign Up
-          </Button>
+        <Button
+          type="submit"
+          disabled={loading} // Prevent double clicks
+          className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-lg py-2 mt-4 flex items-center justify-center"
+        >
+          {loading ? (
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
+            </svg>
+          ) : (
+            "Sign Up"
+          )}
+        </Button>
+
         </form>
       </div>
     </div>

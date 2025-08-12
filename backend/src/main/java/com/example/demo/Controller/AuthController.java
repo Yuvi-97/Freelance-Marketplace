@@ -6,6 +6,10 @@ import com.example.demo.dto.RegisterRequest;
 import com.example.demo.Model.User;
 import com.example.demo.Service.*;
 import lombok.RequiredArgsConstructor;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +26,15 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Map<String, Object>> signup(@RequestBody RegisterRequest request) {
         User user = authService.registerUser(request);
-        return ResponseEntity.ok("User registered as " + user.getRole());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("username", user.getUsername());
+        response.put("role", user.getRole());
+        response.put("name", request.getName() != null ? request.getName() : request.getClientName());
+
+        return ResponseEntity.ok(response);
     }
     
 }

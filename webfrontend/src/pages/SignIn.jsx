@@ -1,15 +1,41 @@
 import { useState } from "react";
 import bgImage from "../assets/authbg.jpeg";
 import Button from "../component/ui/Button";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function SignIn() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Replace with your login logic (API call)
-    alert(`Email: ${email}\nPassword: ${password}`);
+    setLoading(true);
+
+    try {
+      const res = await axios.post("http://localhost:8080/auth/login", {
+        username,
+        password,
+      });
+
+      const { token, userId } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", userId);
+
+      const userRes = await axios.get(`http://localhost:8080/api/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      localStorage.setItem("username", userRes.data.username);
+
+      navigate("/");
+    } catch (err) {
+      console.error("Login failed:", err);
+      alert("Invalid username or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,17 +68,17 @@ function SignIn() {
           <p className="text-center mb-6">Sign in to your Freeverse Account</p>
 
           <div className="mb-4">
-            <label className="block mb-1 font-medium" htmlFor="email">
+            <label className="block mb-1 font-medium" htmlFor="username">
               Username
             </label>
             <input
-              id="email"
-              type="email"
+              id="username"
+              type="text"
               className="w-full border rounded px-3 py-2"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="you@example.com"
+              placeholder="Enter your username"
             />
           </div>
 
@@ -72,7 +98,6 @@ function SignIn() {
             />
           </div>
 
-          {/* Forgot Password */}
           <div className="text-right mb-6">
             <a
               href="/forgot-password"
@@ -89,7 +114,6 @@ function SignIn() {
             Sign In
           </Button>
 
-          {/* Sign Up Link */}
           <p className="text-center text-sm mt-4">
             Don't have an Account?{" "}
             <a
