@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
 
 function Header() {
-  const username = localStorage.getItem("username");
+  const [username, setUsername] = useState(localStorage.getItem("username"));
+  useEffect(() => {
+    const handleLogin = () => {
+      setUsername(localStorage.getItem("username"));
+    };
+
+    window.addEventListener("login", handleLogin);
+    return () => window.removeEventListener("login", handleLogin);
+  }, []);
   return (
     <header className="bg-gray-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -17,10 +25,10 @@ function Header() {
           <Link to="/" className="text-gray-200 hover:text-blue-300 transition">
             Home
           </Link>
-          <Link to="/find-work" className="text-gray-200 hover:text-blue-300 transition">
+          <Link to="/job-listings" className="text-gray-200 hover:text-blue-300 transition">
             Find Work
           </Link>
-          <Link to="/post-job" className="text-gray-200 hover:text-blue-300 transition">
+          <Link to="/post-project" className="text-gray-200 hover:text-blue-300 transition">
             Post a Job
           </Link>
           <Link to="/about" className="text-gray-200 hover:text-blue-300 transition">

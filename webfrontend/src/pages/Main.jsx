@@ -58,13 +58,13 @@ function Main() {
         </div>
       </div>
       </div>
-      <div className="flex flex-col items-center justify-center mt-10 space-y-4">
+      {/* <div className="flex flex-col items-center justify-center mt-10 space-y-4">
         <p className="text-black font-bold text-3xl">Featured Freelancers</p>
         <p>
           {" "}
           Discover top-rated professionals ready to bring your vision to life
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }

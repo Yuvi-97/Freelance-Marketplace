@@ -8,7 +8,7 @@ function Footer() {
         
         {/* Logo + Description */}
         <div>
-          <h2 className="text-2xl font-bold text-white mb-3">FreelanceHub</h2>
+          <h2 className="text-2xl font-bold text-white mb-3">Freeverse</h2>
           <p className="text-sm">
             Connecting talented freelancers with clients worldwide.  
             Find work, post jobs, and grow your career.
@@ -40,7 +40,7 @@ function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-700 text-center py-4 text-sm text-gray-400">
-        © {new Date().getFullYear()} FreelanceHub. All rights reserved.
+        © {new Date().getFullYear()} Freeverse. All rights reserved.
       </div>
     </footer>
   );
