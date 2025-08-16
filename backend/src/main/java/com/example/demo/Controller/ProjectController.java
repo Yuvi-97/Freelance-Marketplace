@@ -81,6 +81,6 @@ public class ProjectController {
 
     @GetMapping
     public Page<Project> getAllProjects(@PageableDefault(size = 10) Pageable pageable) {
-        return projectService.getAllProjects(pageable);
+        return projectService.getAllProjectsPageable(pageable);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,9 @@ public class ProjectService {
     @Autowired
     private FreelancerRepository freelancerRepository;
 
+    @Autowired
+    private ClientProfileRepository clientProfileRepository;
+
     public List<Project> getAllProjects() {
         return projectRepository.findAll();
     }
@@ -27,11 +31,20 @@ public class ProjectService {
         return projectRepository.findById(id);
     }
 
-    public Project createProject(Project project) {
-        project.setStatus("OPEN");
-        project.setCreatedDate(java.time.LocalDate.now());
-        return projectRepository.save(project);
+  public Project createProject(Project project) {
+    project.setStatus("OPEN");
+    project.setCreatedDate(java.time.LocalDate.now());
+
+    if (project.getClient() != null && project.getClient().getId() != null) {
+        Long clientId = project.getClient().getId();
+        ClientProfile client = clientProfileRepository.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Client not found with id: " + clientId));
+        project.setClient(client); 
     }
+
+    return projectRepository.save(project);
+}
+
 
     public Project updateProject(Long id, Project updatedProject) {
         return projectRepository.findById(id).map(project -> {
@@ -69,7 +82,7 @@ public class ProjectService {
         return projectRepository.findByBudgetBetween(min,max);
     }
 
-    public Page<Project> getAllProjects(Pageable pageable) {
+    public Page<Project> getAllProjectsPageable(Pageable pageable) {
         return projectRepository.findAll(pageable);
     }
 }

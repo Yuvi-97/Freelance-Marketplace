@@ -1,6 +1,9 @@
 package com.example.demo.Model;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,8 +23,10 @@ public class ClientProfile {
     private String contactEmail;
     private String phone;
     private String profileUrl;
+    
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Project> projects;
+    @JsonManagedReference
+    private List<Project> projects = new ArrayList<>();
 
     
     @OneToOne(cascade = CascadeType.ALL)
