@@ -30,10 +30,20 @@ function SignIn() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      localStorage.setItem("username", userRes.data.username);
+
+      const { username: fetchedUsername, role } = userRes.data;
+      localStorage.setItem("username", fetchedUsername);
+      localStorage.setItem("role", role);
+
       window.dispatchEvent(new Event("login"));
 
-      navigate("/");
+      if (role === "CLIENT") {
+        navigate("/client-dashboard");
+      } else if (role === "FREELANCER") {
+        navigate("/freelancer-dashboard");
+      } else {
+        navigate("/"); 
+      }
     } catch (err) {
       console.error("Login failed:", err);
       alert("Invalid username or password");
@@ -51,7 +61,6 @@ function SignIn() {
         backgroundPosition: "center",
       }}
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black opacity-60"></div>
 
       <div className="w-1/2 flex flex-col justify-center items-center text-white relative z-10 p-12">

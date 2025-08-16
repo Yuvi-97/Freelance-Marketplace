@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import CategorySelector from "../component/ui/CategorySelector";
 
 function PostProject() {
   const navigate = useNavigate();
@@ -11,20 +12,32 @@ function PostProject() {
   const [budget, setBudget] = useState("");
   const [deadline, setDeadline] = useState("");
   const [status, setStatus] = useState("OPEN");
-  const [createdDate, setCreatedDate] = useState("");
-  const [clientId, setClientId] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [otherCategory, setOtherCategory] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Auto-fill created date
-    setCreatedDate(new Date().toISOString().split("T")[0]);
+  // Message state
+  const [message, setMessage] = useState({ text: "", type: "" });
 
-    // Get client ID from localStorage
+  // Predefined category options
+  const categoryOptions = [
+    "Web Development",
+    "Mobile Development",
+    "Design & Creative",
+    "Writing & Translation",
+    "Digital Marketing",
+    "Data Science",
+    "DevOps & Cloud",
+    "Other",
+  ];
+
+  useEffect(() => {
     const storedId = localStorage.getItem("userId");
-    if (storedId) {
-      setClientId(parseInt(storedId, 10));
-    } else {
-      alert("You must be logged in as a client to post a project.");
+    if (!storedId) {
+      setMessage({
+        text: "You must be logged in as a client to post a project.",
+        type: "error",
+      });
       navigate("/login");
     }
   }, [navigate]);
@@ -32,15 +45,24 @@ function PostProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (!title || !description || !budget || !deadline) {
-      alert("Please fill in all required fields.");
+      setMessage({
+        text: "Please fill in all required fields.",
+        type: "error",
+      });
       return;
     }
     if (budget <= 0) {
-      alert("Budget must be a positive number.");
+      setMessage({ text: "Budget must be a positive number.", type: "error" });
       return;
     }
+
+    let finalCategories = categories.filter((cat) => cat !== "Other");
+    if (categories.includes("Other") && otherCategory.trim() !== "") {
+      finalCategories.push(otherCategory.trim());
+    }
+
+    const clientId = localStorage.getItem("userId");
 
     const projectData = {
       title,
@@ -48,22 +70,36 @@ function PostProject() {
       budget: parseFloat(budget),
       deadline,
       status,
-      createdDate,
+      createdDate: new Date().toISOString().split("T")[0],
+      categories: finalCategories,
       client: { id: clientId },
     };
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:8080/projects", projectData, {
+      await axios.post("http://localhost:8080/api/projects", projectData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      alert("Project posted successfully!");
-      navigate("/my-projects");
+
+      setMessage({ text: "✅ Project posted successfully!", type: "success" });
+      setTimeout(() => navigate("/my-projects"), 1500);
     } catch (err) {
       console.error("Error posting project:", err);
-      alert("Failed to post project. Please try again.");
+
+      if (err.response?.status === 401) {
+        setMessage({
+          text: "⚠️ Unauthorized. Please login to continue.",
+          type: "error",
+        });
+        setTimeout(() => navigate("/login"), 2000);
+      } else {
+        setMessage({
+          text: "❌ Failed to post project. Please try again.",
+          type: "error",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -75,8 +111,24 @@ function PostProject() {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg"
       >
-        <h2 className="text-2xl font-bold mb-6 text-blue-800">Post a Project</h2>
+        <h2 className="text-2xl font-bold mb-6 text-blue-800">
+          Post a Project
+        </h2>
 
+        {/* Inline message */}
+        {message.text && (
+          <div
+            className={`mb-4 p-3 rounded ${
+              message.type === "success"
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+
+        {/* Title */}
         <div className="mb-4">
           <label className="block font-medium mb-1">Title *</label>
           <input
@@ -100,6 +152,7 @@ function PostProject() {
           ></textarea>
         </div>
 
+        {/* Budget */}
         <div className="mb-4">
           <label className="block font-medium mb-1">Budget (USD) *</label>
           <input
@@ -125,6 +178,7 @@ function PostProject() {
           />
         </div>
 
+        {/* Status */}
         <div className="mb-4">
           <label className="block font-medium mb-1">Status</label>
           <select
@@ -138,26 +192,13 @@ function PostProject() {
           </select>
         </div>
 
+        {/* Categories */}
         <div className="mb-4">
-          <label className="block font-medium mb-1">Created Date</label>
-          <input
-            type="text"
-            className="w-full border rounded px-3 py-2 bg-gray-100"
-            value={createdDate}
-            readOnly
-          />
+          <label className="block font-medium mb-1">Categories *</label>
+          <CategorySelector onChange={setCategories} />
         </div>
 
-        <div className="mb-6">
-          <label className="block font-medium mb-1">Client ID</label>
-          <input
-            type="text"
-            className="w-full border rounded px-3 py-2 bg-gray-100"
-            value={clientId || ""}
-            readOnly
-          />
-        </div>
-
+        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
