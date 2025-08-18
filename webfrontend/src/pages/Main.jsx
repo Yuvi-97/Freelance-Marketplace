@@ -1,6 +1,17 @@
 import heroBackground from "../assets/hero-background.jpg";
 import Button from "../component/ui/Button.jsx";
 import Card from "../component/ui/Card.jsx";
+import FreelancerCard from "../component/ui/FreelancerCard.jsx"
+
+import {
+  FaCode,
+  FaPaintBrush,
+  FaChartLine,
+  FaPenFancy,
+  FaSearch,
+  FaDatabase,
+} from "react-icons/fa";
+import Ratings from "../component/ui/Ratings.jsx";
 
 function Main() {
   return (
@@ -30,41 +41,79 @@ function Main() {
         </div>
       </section>
       <div className=" bg-blue-50">
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <p className="text-black font-bold text-3xl pt-10">Popular Job Categories</p>
-        <p>
-          {" "}
-          Explore thousands of opportunities across various skill categories
-        </p>
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <p className="text-black font-bold text-3xl pt-10">
+            Popular Job Categories
+          </p>
+          <p>
+            {" "}
+            Explore thousands of opportunities across various skill categories
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-4 mt-8 p-4 pb-20">
+          <div>
+            <Card Icon={FaCode} title="Web Developers" jobs={120} />
+          </div>
+          <div>
+            <Card Icon={FaPaintBrush} title="Graphic Designers" jobs={80} />
+          </div>
+          <div>
+            <Card Icon={FaChartLine} title="Digital Marketers" jobs={100} />
+          </div>
+          <div>
+            <Card Icon={FaPenFancy} title="Content Writers" jobs={60} />
+          </div>
+          <div>
+            <Card Icon={FaSearch} title="SEO Specialists" jobs={90} />
+          </div>
+          <div>
+            <Card Icon={FaDatabase} title="Data Analysts" jobs={110} />
+          </div>
+        </div>
       </div>
-      <div className="flex flex-wrap justify-center gap-4 mt-8 p-4 pb-20">
-        <div>
-          <Card className="ph-10" title="Web Developers" jobs={120} />
-        </div>
-        <div>
-          <Card title="Graphic Designers" jobs={80} />
-        </div>
-        <div>
-          <Card title="Digital Marketers" jobs={100} />
-        </div>
-        <div>
-          <Card title="Content Writers" jobs={60} />
-        </div>
-        <div>
-          <Card title="SEO Specialists" jobs={90} />
-        </div>
-        <div>
-          <Card title="Data Analysts" jobs={110} />
-        </div>
-      </div>
-      </div>
-      {/* <div className="flex flex-col items-center justify-center mt-10 space-y-4">
+      <div className="flex flex-col items-center justify-center mt-10 space-y-4">
         <p className="text-black font-bold text-3xl">Featured Freelancers</p>
-        <p>
-          {" "}
+        <p className="text-gray-600">
           Discover top-rated professionals ready to bring your vision to life
         </p>
-      </div> */}
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-16 mt-8 pb-20">
+        <FreelancerCard
+          image="https://randomuser.me/api/portraits/women/44.jpg"
+          name="Sarah Johnson"
+          role="Full-Stack Developer"
+          rate={85}
+          rating={4.9}
+          location="San Francisco, CA"
+          description="Experienced full-stack developer with 8+ years building scalable web applications..."
+          skills={["React", "Node.js", "TypeScript", "GraphQL"]}
+        />
+
+        <FreelancerCard
+          image="https://randomuser.me/api/portraits/men/32.jpg"
+          name="Marcus Chen"
+          role="UI/UX Designer"
+          rate={75}
+          rating={4.8}
+          location="New York, NY"
+          description="Creative designer specializing in modern, user-centered designs that drive engagement..."
+          skills={["Figma", "Adobe XD", "Prototyping", "Illustrator"]}
+        />
+
+        <FreelancerCard
+          image="https://randomuser.me/api/portraits/women/68.jpg"
+          name="Emily Rodriguez"
+          role="Frontend Developer"
+          rate={70}
+          rating={4.9}
+          location="Austin, TX"
+          description="Frontend specialist creating beautiful, responsive interfaces with a focus on usability..."
+          skills={["React", "Vue.js", "CSS3", "Tailwind"]}
+        />
+      </div>
+
+      <Ratings/>
     </div>
   );
 }

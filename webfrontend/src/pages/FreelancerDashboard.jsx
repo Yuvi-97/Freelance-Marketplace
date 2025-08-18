@@ -1,25 +1,28 @@
 import Button from "../component/ui/Button.jsx";
 import Card from "../component/ui/Card.jsx";
-
+import Freelancerbg from "../assets/freelancer-bg.jpeg";
 function FreelancerDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <section
-        style={{ backgroundColor: "#0A2647" }}
-        className="text-white py-28 text-center"
+        className="text-white py-28 text-center relative bg-cover bg-center h-96"
+        style={{ backgroundImage: `url(${Freelancerbg})` }}
       >
-        <h1 className="text-4xl font-bold">Freelancer Dashboard</h1>
-        <p className="mt-2">Browse jobs & manage your work</p>
-        <div className="mt-4 flex justify-center gap-4">
-          <Button className="bg-white text-[#0A2647] hover:bg-gray-100">
-            Find Jobs
-          </Button>
-          <Button className="bg-white text-[#0A2647] hover:bg-gray-100">
-            My Applications
-          </Button>
+        <div className="absolute inset-0 bg-black opacity-60"></div>
+        <div className="relative z-10">
+          <h1 className="text-4xl font-bold ">Freelancer Dashboard</h1>
+          <p className="mt-2">Browse jobs & manage your work</p>
+          <div className="mt-4 flex justify-center gap-4">
+            <Button className="bg-white text-[#0A2647] hover:bg-gray-100">
+              Find Jobs
+            </Button>
+            <Button className="bg-white text-[#0A2647] hover:bg-gray-100">
+              My Applications
+            </Button>
+          </div>
         </div>
       </section>
-      {/* Stats */}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
         <Card title="Jobs Applied" jobs={15} />
         <Card title="Active Projects" jobs={3} />
