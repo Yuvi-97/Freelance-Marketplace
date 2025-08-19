@@ -9,7 +9,7 @@ function ClientDashboard() {
         style={{ backgroundImage: `url(${clientbg})` }}
         className="text-white py-28 text-center relative bg-cover bg-center h-96"
       >
-        <div className="absolute inset-0 bg-black opacity-60"></div>
+        <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10">
           <h1 className="text-4xl font-bold">Client Dashboard</h1>
           <p className="mt-2">Manage your job postings & track freelancers</p>

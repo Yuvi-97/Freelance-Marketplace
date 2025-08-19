@@ -10,6 +10,7 @@ import JobListings from "./pages/JobListings.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import FreelancerDashboard from "./pages/FreelancerDashboard.jsx";
 import ClientDashboard from "./pages/ClientDashboard.jsx";
+import MyProjects from "./pages/MyProject.jsx";
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState("");
@@ -25,6 +26,7 @@ function App() {
         <Route path="/freelancer-dashboard" element={<FreelancerDashboard />} />
         <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/my-projects" element={<MyProjects/>} />
       </Routes>
       <Footer />
     </>

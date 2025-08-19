@@ -1,7 +1,8 @@
 import heroBackground from "../assets/hero-background.jpg";
 import Button from "../component/ui/Button.jsx";
 import Card from "../component/ui/Card.jsx";
-import FreelancerCard from "../component/ui/FreelancerCard.jsx"
+import FreelancerCard from "../component/ui/FreelancerCard.jsx";
+import { useNavigate } from "react-router-dom";
 
 import {
   FaCode,
@@ -14,6 +15,8 @@ import {
 import Ratings from "../component/ui/Ratings.jsx";
 
 function Main() {
+  const navigate = useNavigate();
+
   return (
     <div className="App">
       <section
@@ -31,10 +34,16 @@ function Main() {
             done faster with our curated community of skilled professionals.
           </p>
           <div className="flex space-x-4">
-            <Button className="bg-blue-500 text-white hover:bg-blue-300">
+            <Button
+              className="bg-blue-500 text-white hover:bg-blue-300"
+              onClick={() => navigate("/signup")}
+            >
               Find Work
             </Button>
-            <Button className="bg-blue-500 text-white hover:bg-blue-300">
+            <Button
+              className="bg-blue-500 text-white hover:bg-blue-300"
+              onClick={() => navigate("/signup")}
+            >
               Post a Job
             </Button>
           </div>
@@ -113,7 +122,7 @@ function Main() {
         />
       </div>
 
-      <Ratings/>
+      <Ratings />
     </div>
   );
 }

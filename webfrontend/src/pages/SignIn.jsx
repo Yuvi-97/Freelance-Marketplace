@@ -1,8 +1,8 @@
+import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import bgImage from "../assets/authbg.jpeg";
 import Button from "../component/ui/Button";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 function SignIn() {
   const [username, setUsername] = useState("");
@@ -24,6 +24,7 @@ function SignIn() {
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
 
+      // Fetch user details
       const userRes = await axios.get(
         `http://localhost:8080/api/users/${userId}`,
         {
@@ -35,15 +36,29 @@ function SignIn() {
       localStorage.setItem("username", fetchedUsername);
       localStorage.setItem("role", role);
 
-      window.dispatchEvent(new Event("login"));
-
       if (role === "CLIENT") {
+        const clientRes = await axios.get(
+          `http://localhost:8080/api/clients/user/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const { id: clientId } = clientRes.data;
+        localStorage.setItem("clientId", clientId);
+
         navigate("/client-dashboard");
       } else if (role === "FREELANCER") {
+        const freelancerRes = await axios.get(
+          `http://localhost:8080/api/freelancers/user/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        localStorage.setItem("freelancerId", freelancerRes.data.id);
         navigate("/freelancer-dashboard");
       } else {
-        navigate("/"); 
+        navigate("/");
       }
+
+      window.dispatchEvent(new Event("login"));
     } catch (err) {
       console.error("Login failed:", err);
       alert("Invalid username or password");

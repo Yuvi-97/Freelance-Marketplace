@@ -8,7 +8,7 @@ function FreelancerDashboard() {
         className="text-white py-28 text-center relative bg-cover bg-center h-96"
         style={{ backgroundImage: `url(${Freelancerbg})` }}
       >
-        <div className="absolute inset-0 bg-black opacity-60"></div>
+        <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10">
           <h1 className="text-4xl font-bold ">Freelancer Dashboard</h1>
           <p className="mt-2">Browse jobs & manage your work</p>
