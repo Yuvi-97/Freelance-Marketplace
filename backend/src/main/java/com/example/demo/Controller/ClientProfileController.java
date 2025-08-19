@@ -28,4 +28,10 @@ public class ClientProfileController {
     public ClientProfile getClient(@PathVariable Long id) {
         return clientProfileService.getClientById(id);
     }
+
+    @GetMapping("/user/{userId}")
+    public ClientProfile getClientByUserId(@PathVariable Long userId) {
+        return clientProfileService.getClientByUserId(userId);
+    }
+
 }

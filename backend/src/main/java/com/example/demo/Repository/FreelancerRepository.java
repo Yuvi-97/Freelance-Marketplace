@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface FreelancerRepository extends JpaRepository<Freelancer, Long> {
     Optional<Freelancer> findByUser(User user);
+    Optional<Freelancer> findByUserId(Long userId);
     @Query("SELECT f FROM Freelancer f WHERE f.user.username LIKE %:username%")
     List<Freelancer> findByUsernameLike(@Param("username") String username);    
 

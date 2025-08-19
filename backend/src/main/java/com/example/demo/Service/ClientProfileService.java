@@ -10,11 +10,17 @@ import java.util.List;
 @Service
 public class ClientProfileService {
 
+
+
     @Autowired
     private ClientProfileRepository clientProfileRepository;
 
     public ClientProfile createClient(ClientProfile clientProfile) {
         return clientProfileRepository.save(clientProfile);
+    }
+    public ClientProfile getClientByUserId(Long userId) {
+        return clientProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
     }
 
     public List<ClientProfile> getAllClients() {
