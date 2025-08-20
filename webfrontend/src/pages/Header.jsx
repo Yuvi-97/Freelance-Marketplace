@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
 
 function Header() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState(localStorage.getItem("username"));
   const [role, setRole] = useState(localStorage.getItem("role"));
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,7 +22,9 @@ function Header() {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("role");
-    window.location.reload();
+    setUsername(null); // Update state to reflect logout
+    setRole(null);
+    navigate("/"); // Redirect to landing page
   };
 
   return (
