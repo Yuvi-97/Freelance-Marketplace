@@ -8,6 +8,7 @@ function SignUp({ onUserLoggedIn }) {
   const [role, setRole] = useState("CLIENT");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   const [form, setForm] = useState({
     username: "",
@@ -27,11 +28,10 @@ function SignUp({ onUserLoggedIn }) {
   };
 
   const handleRoleChange = (newRole) => setRole(newRole);
-  const API_BASE = process.env.REACT_APP_API_URL;
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log("API_BASE:", process.env.REACT_APP_API_BASE_URL);
+    console.log("API_BASE:", API_BASE);
 
     let payload = {
       username: form.username,
