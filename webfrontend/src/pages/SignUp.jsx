@@ -27,8 +27,8 @@ function SignUp({ onUserLoggedIn }) {
   };
 
   const handleRoleChange = (newRole) => setRole(newRole);
-
-    const handleSubmit = async (e) => {
+  const API_BASE = process.env.REACT_APP_API_URL;
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
@@ -59,14 +59,13 @@ function SignUp({ onUserLoggedIn }) {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/auth/signup", payload);
+      const res = await axios.post(`${API_BASE}/auth/signup`, payload);
       console.log("Signup success:", res.data);
-
-      navigate("/login"); 
+      navigate("/login");
     } catch (err) {
       console.error("Signup error:", err);
       alert("Failed to sign up. Please try again.");
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -120,7 +119,9 @@ function SignUp({ onUserLoggedIn }) {
           onSubmit={handleSubmit}
           className="bg-white p-8 rounded-xl shadow-md w-full max-w-md overflow-auto max-h-[90vh]"
         >
-          <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            Create Account
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -175,10 +176,7 @@ function SignUp({ onUserLoggedIn }) {
           {role === "CLIENT" ? (
             <>
               <div className="mb-4">
-                <label
-                  className="block mb-1 font-medium"
-                  htmlFor="clientName"
-                >
+                <label className="block mb-1 font-medium" htmlFor="clientName">
                   Name
                 </label>
                 <input
@@ -303,37 +301,36 @@ function SignUp({ onUserLoggedIn }) {
             </>
           )}
 
-        <Button
-          type="submit"
-          disabled={loading} // Prevent double clicks
-          className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-lg py-2 mt-4 flex items-center justify-center"
-        >
-          {loading ? (
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
-            </svg>
-          ) : (
-            "Sign Up"
-          )}
-        </Button>
-
+          <Button
+            type="submit"
+            disabled={loading} // Prevent double clicks
+            className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-lg py-2 mt-4 flex items-center justify-center"
+          >
+            {loading ? (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+            ) : (
+              "Sign Up"
+            )}
+          </Button>
         </form>
       </div>
     </div>
