@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/login", "/auth/signup").permitAll() // public endpoints
+                .requestMatchers("/","/auth/login", "/auth/signup").permitAll() // public endpoints
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -46,7 +46,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // frontend URL
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000", // local dev
+            "https://freelance-marketplace-orpin.vercel.app" // deployed frontend
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true); // Allow cookies / auth headers if needed
