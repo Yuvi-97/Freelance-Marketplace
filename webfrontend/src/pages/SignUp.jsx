@@ -60,7 +60,7 @@ function SignUp({ onUserLoggedIn }) {
     }
 
     try {
-      const res = await axios.post(`${API_BASE}/auth/signup`, payload);
+      const res = await axios.post(`${API_BASE}/api/auth/signup`, payload);
       console.log("Signup success:", res.data);
       navigate("/login");
     } catch (err) {
