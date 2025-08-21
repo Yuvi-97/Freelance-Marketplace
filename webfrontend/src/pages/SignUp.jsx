@@ -31,6 +31,7 @@ function SignUp({ onUserLoggedIn }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    console.log("API_BASE:", process.env.REACT_APP_API_BASE_URL);
 
     let payload = {
       username: form.username,
