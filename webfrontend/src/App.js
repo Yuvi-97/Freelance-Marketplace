@@ -11,6 +11,7 @@ import AboutPage from "./pages/AboutPage.jsx";
 import FreelancerDashboard from "./pages/FreelancerDashboard.jsx";
 import ClientDashboard from "./pages/ClientDashboard.jsx";
 import MyProjects from "./pages/MyProject.jsx";
+import ApplicationsPage from "./pages/MyApplication.jsx";
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState("");
@@ -27,6 +28,7 @@ function App() {
         <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/my-projects" element={<MyProjects/>} />
+        <Route path="/my-applications" element={<ApplicationsPage/>} />
       </Routes>
       <Footer />
     </>

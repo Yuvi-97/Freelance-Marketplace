@@ -1,8 +1,10 @@
 // src/components/ProjectCard.jsx
 import { FaUsers, FaCalendarAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 function ProjectCard({ project }) {
   const getStatusBadge = (status) => {
+    console.log(project);
     switch (status?.toLowerCase()) {
       case "completed":
         return (
@@ -50,6 +52,18 @@ function ProjectCard({ project }) {
           {project.freelancerCount > 1 ? "s interested" : " interested"}
         </p>
       </div>
+
+      {project.freelancer && (
+        <p className="mt-3 text-sm">
+          Assigned to:{" "}
+          <Link
+            to={`/freelancer/${project.freelancer.id}`}
+            className="text-indigo-600 font-medium hover:underline"
+          >
+            {project.freelancer.name}
+          </Link>
+        </p>
+      )}
 
       <p className="text-xs text-gray-400 mt-4">
         Posted: {new Date(project.postedDate).toLocaleDateString()}

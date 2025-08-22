@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 function JobListings() {
   const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("Most Relevant");
-
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -14,14 +14,41 @@ function JobListings() {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem("token"); // get JWT token
-      const res = await axios.get("http://localhost:8080/api/projects/all", {
+      const res = await axios.get(`${API_BASE}/api/projects/all`, {
         headers: {
           Authorization: `Bearer ${token}`, // send JWT in header
         },
       });
+      console.log("Fetched projects:", res.data);
       setProjects(res.data);
     } catch (err) {
       console.error("Error fetching projects:", err);
+    }
+  };
+
+  // inside JobListings component
+  const handleAcceptProject = async (projectId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const freelancerId = localStorage.getItem("freelancerId"); // assume stored after login
+
+      const res = await axios.put(
+        `${API_BASE}/api/projects/${projectId}/accept?freelancerId=${freelancerId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Project accepted:", res.data);
+
+      fetchProjects();
+      alert("You have successfully applied for this project!");
+    } catch (err) {
+      console.error("Error accepting project:", err);
+      alert("Failed to apply. Please try again.");
     }
   };
 
@@ -30,7 +57,8 @@ function JobListings() {
     .filter((p) => p.title.toLowerCase().includes(search.toLowerCase()))
     .filter((p) => (category ? p.categories.includes(category) : true))
     .sort((a, b) => {
-      if (sort === "Newest") return new Date(b.createdDate) - new Date(a.createdDate);
+      if (sort === "Newest")
+        return new Date(b.createdDate) - new Date(a.createdDate);
       if (sort === "Highest Budget") return b.budget - a.budget;
       return 0; // Most Relevant
     });
@@ -48,7 +76,9 @@ function JobListings() {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-blue-900">Find Your Next Project</h1>
+        <h1 className="text-3xl font-bold text-blue-900">
+          Find Your Next Project
+        </h1>
         <p className="text-gray-600 mt-1">
           Discover projects from clients around the world
         </p>
@@ -101,7 +131,9 @@ function JobListings() {
         {/* Project List */}
         <div className="flex-1">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-gray-600">{filteredProjects.length} projects found</span>
+            <span className="text-gray-600">
+              {filteredProjects.length} projects found
+            </span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
@@ -113,39 +145,61 @@ function JobListings() {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            {" "}
+            {/* replaces grid */}
             {filteredProjects.map((proj) => (
               <div
                 key={proj.id}
-                className="border rounded-lg p-5 bg-white shadow-sm hover:shadow-md transition"
+                className="border rounded-xl p-6 bg-white shadow hover:shadow-lg transition"
               >
-                <h2 className="text-lg font-semibold text-blue-900">{proj.title}</h2>
-                <p className="text-gray-700 mt-2">{proj.description}</p>
+                {/* Title + Budget */}
+                <div className="flex justify-between items-start">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {proj.title}
+                  </h2>
+                  <span className="text-green-600 font-semibold">
+                    ${proj.budget}
+                  </span>
+                </div>
 
+                {/* Company / Client */}
+                <p className="text-sm text-gray-500 mt-1">{proj.clientName}</p>
+
+                {/* Description */}
+                <p className="text-gray-700 mt-3 line-clamp-3">
+                  {proj.description}
+                </p>
+
+                {/* Tech Stack / Categories */}
                 <div className="flex flex-wrap gap-2 mt-3">
                   {proj.categories.map((cat) => (
                     <span
                       key={cat}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs"
+                      className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-medium"
                     >
                       {cat}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-                  <span>📅 Deadline: {proj.deadline}</span>
-                  <span>💰 ${proj.budget}</span>
+                {/* Footer */}
+                <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-4">
+                  </div>
+                  <button
+                    onClick={() => handleAcceptProject(proj.id)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                  >
+                    Apply Now
+                  </button>
                 </div>
-
-                <button className="mt-4 w-full bg-blue-600 text-white text-sm py-2 rounded-lg hover:bg-blue-700 transition">
-                  Apply Now
-                </button>
               </div>
             ))}
-
             {filteredProjects.length === 0 && (
-              <p className="text-center text-gray-500 mt-10">No projects found.</p>
+              <p className="text-center text-gray-500 mt-10">
+                No projects found.
+              </p>
             )}
           </div>
         </div>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CategorySelector from "../component/ui/CategorySelector";
 
@@ -16,10 +16,10 @@ function PostProject() {
   const [otherCategory, setOtherCategory] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Message state
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
+
   const [message, setMessage] = useState({ text: "", type: "" });
 
-  // Predefined category options
   const categoryOptions = [
     "Web Development",
     "Mobile Development",
@@ -77,7 +77,7 @@ function PostProject() {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:8080/api/projects", projectData, {
+      await axios.post(`${API_BASE}/api/projects`, projectData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

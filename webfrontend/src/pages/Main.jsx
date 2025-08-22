@@ -1,16 +1,16 @@
+import { useNavigate } from "react-router-dom";
 import heroBackground from "../assets/hero-background.jpg";
 import Button from "../component/ui/Button.jsx";
 import Card from "../component/ui/Card.jsx";
 import FreelancerCard from "../component/ui/FreelancerCard.jsx";
-import { useNavigate } from "react-router-dom";
 
 import {
-  FaCode,
-  FaPaintBrush,
   FaChartLine,
+  FaCode,
+  FaDatabase,
+  FaPaintBrush,
   FaPenFancy,
   FaSearch,
-  FaDatabase,
 } from "react-icons/fa";
 import Ratings from "../component/ui/Ratings.jsx";
 
@@ -24,7 +24,7 @@ function Main() {
         style={{ backgroundImage: `url(${heroBackground})` }}
       >
         <div className="absolute inset-0 bg-black opacity-60"></div>
-        {/* Content above overlay */}
+
         <div className="flex flex-col items-center justify-center h-full relative z-10 text-center px-4">
           <h1 className="text-white text-5xl font-bold">
             Find the Perfect <span className="text-blue-300">Freelancer</span>
