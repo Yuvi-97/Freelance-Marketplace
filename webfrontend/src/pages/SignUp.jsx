@@ -8,7 +8,7 @@ function SignUp({ onUserLoggedIn }) {
   const [role, setRole] = useState("CLIENT");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const API_BASE = process.env.REACT_APP_API_URL;
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
   const [form, setForm] = useState({
     username: "",

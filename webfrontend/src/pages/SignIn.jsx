@@ -8,6 +8,7 @@ function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const API_BASE = process.env.REACT_APP_API_BASE_URL;
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -15,7 +16,7 @@ function SignIn() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8080/auth/login", {
+      const res = await axios.post(`${API_BASE}/api/auth/login`, {
         username,
         password,
       });
@@ -26,7 +27,7 @@ function SignIn() {
 
       // Fetch user details
       const userRes = await axios.get(
-        `http://localhost:8080/api/users/${userId}`,
+        `${API_BASE}/api/users/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -38,7 +39,7 @@ function SignIn() {
 
       if (role === "CLIENT") {
         const clientRes = await axios.get(
-          `http://localhost:8080/api/clients/user/${userId}`,
+          `${API_BASE}/api/clients/user/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -49,7 +50,7 @@ function SignIn() {
         navigate("/client-dashboard");
       } else if (role === "FREELANCER") {
         const freelancerRes = await axios.get(
-          `http://localhost:8080/api/freelancers/user/${userId}`,
+          `${API_BASE}/api/freelancers/user/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         localStorage.setItem("freelancerId", freelancerRes.data.id);
