@@ -74,6 +74,7 @@ public class ProjectService {
         Freelancer freelancer = freelancerRepository.findById(freelancerId)
                 .orElseThrow(() -> new RuntimeException("Freelancer not found"));
         project.setAssignedFreelancer(freelancer);
+        project.setStatus("APPLIED");
         return projectRepository.save(project);
     }
     public List<Project> getProjectsByRange(Double min,Double max){

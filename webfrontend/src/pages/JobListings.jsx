@@ -45,7 +45,7 @@ function JobListings() {
       console.log("Project accepted:", res.data);
 
       fetchProjects();
-      alert("You have successfully applied for this project!");
+      // alert("You have successfully applied for this project!");
     } catch (err) {
       console.error("Error accepting project:", err);
       alert("Failed to apply. Please try again.");
@@ -185,14 +185,22 @@ function JobListings() {
 
                 {/* Footer */}
                 <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-4">
-                  </div>
-                  <button
-                    onClick={() => handleAcceptProject(proj.id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
-                  >
-                    Apply Now
-                  </button>
+                  <div className="flex items-center gap-4"></div>
+                  {proj.status === "APPLIED" ? (
+                    <button
+                      disabled
+                      className="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+                    >
+                      Applied
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleAcceptProject(proj.id)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                    >
+                      Apply Now
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
