@@ -24,7 +24,7 @@ function SignIn() {
       const { token, userId } = res.data;
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
-
+      console.log(token);
       // Fetch user details
       const userRes = await axios.get(
         `${API_BASE}/api/users/${userId}`,

@@ -12,23 +12,28 @@ import FreelancerDashboard from "./pages/FreelancerDashboard.jsx";
 import ClientDashboard from "./pages/ClientDashboard.jsx";
 import MyProjects from "./pages/MyProject.jsx";
 import ApplicationsPage from "./pages/MyApplication.jsx";
+import FreelancerProfile from "./pages/FreelancerProfile.jsx";
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState("");
   return (
     <>
-      <Header user={loggedInUser}/>
+      <Header user={loggedInUser} />
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp onUserLoggedIn={setLoggedInUser}/>} />
-        <Route path="/post-project" element={<PostProject/>} />
+        <Route
+          path="/signup"
+          element={<SignUp onUserLoggedIn={setLoggedInUser} />}
+        />
+        <Route path="/post-project" element={<PostProject />} />
         <Route path="/job-listings" element={<JobListings />} />
         <Route path="/freelancer-dashboard" element={<FreelancerDashboard />} />
         <Route path="/client-dashboard" element={<ClientDashboard />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/my-projects" element={<MyProjects/>} />
-        <Route path="/my-applications" element={<ApplicationsPage/>} />
+        <Route path="/my-projects" element={<MyProjects />} />
+        <Route path="/my-applications" element={<ApplicationsPage />} />
+        <Route path="/freelancer/:id" element={<FreelancerProfile />} />
       </Routes>
       <Footer />
     </>
