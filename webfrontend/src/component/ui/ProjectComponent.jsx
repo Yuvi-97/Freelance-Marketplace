@@ -30,9 +30,7 @@ function ProjectCard({ project }) {
   return (
     <div className="bg-white rounded-xl p-6 shadow hover:shadow-lg transition">
       <div className="flex justify-between items-start mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          {project.title}
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-800">{project.title}</h2>
         {getStatusBadge(project.status)}
       </div>
 
@@ -53,14 +51,14 @@ function ProjectCard({ project }) {
         </p>
       </div>
 
-      {project.freelancer && (
+      {project.assignedFreelancer && (
         <p className="mt-3 text-sm">
           Assigned to:{" "}
           <Link
-            to={`/freelancer/${project.freelancer.id}`}
+            to={`/freelancer/${project.assignedFreelancer.id}`}
             className="text-indigo-600 font-medium hover:underline"
           >
-            {project.freelancer.name}
+            {project.assignedFreelancer.name}
           </Link>
         </p>
       )}

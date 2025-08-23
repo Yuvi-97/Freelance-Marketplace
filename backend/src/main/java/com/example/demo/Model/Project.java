@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Data
@@ -31,12 +33,11 @@ public class Project {
     @Column(name = "category")
     private java.util.List<String> categories = new ArrayList<>();
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "freelancer_id")
+    @JsonIgnoreProperties("projects")
     private Freelancer assignedFreelancer;
 
-    // @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "client_id")
     @JsonBackReference
