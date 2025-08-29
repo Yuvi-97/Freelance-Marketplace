@@ -1,10 +1,13 @@
 package com.example.demo.Service;
 
-import com.example.demo.Model.ClientProfile;
-import com.example.demo.Model.Freelancer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.example.demo.Model.User;
-import com.example.demo.Repository.ClientProfileRepository;
-import com.example.demo.Repository.FreelancerRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.LoginResponse;
@@ -12,12 +15,6 @@ import com.example.demo.dto.RegisterRequest;
 import com.example.demo.security.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -28,24 +25,26 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final ClientProfileRepository clientRepo;
-    private final FreelancerRepository freelancerRepo;
+    // Profiles will be created later via Profile Setup API
 
         
 
 public LoginResponse login(LoginRequest request) {
     try {
+        String identifier = request.getUsername();
+        // Support login by email or username
+        User user = userRepository.findByUsername(identifier)
+                .orElseGet(() -> userRepository.findByEmail(identifier).orElse(null));
+        if (user == null) {
+            throw new RuntimeException("Invalid username/email or password");
+        }
+
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword())
         );
 
-        String username = authentication.getName();
-
-        // Fetch user from DB
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        String token = jwtUtil.generateToken(username);
+        String authenticatedUsername = authentication.getName();
+        String token = jwtUtil.generateToken(authenticatedUsername);
 
         return new LoginResponse(token, user.getId());
 
@@ -56,35 +55,18 @@ public LoginResponse login(LoginRequest request) {
 
 
     public User registerUser(RegisterRequest request) {
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // Encode password!
-        user.setRole(request.getRole());
-
-        User savedUser = userRepository.save(user);
-
-        if ("CLIENT".equalsIgnoreCase(request.getRole())) {
-            ClientProfile client = new ClientProfile();
-            client.setClientName(request.getClientName());
-            client.setCompany(request.getCompany());
-            client.setContactEmail(request.getEmail());
-            client.setPhone(request.getPhone());
-            client.setProfileUrl(request.getProfileUrl());
-            client.setUser(savedUser);
-            clientRepo.save(client);
-
-        } else if ("FREELANCER".equalsIgnoreCase(request.getRole())) {
-            Freelancer freelancer = new Freelancer();
-            freelancer.setName(request.getName());
-            freelancer.setEmail(request.getEmail());
-            freelancer.setSkills(request.getSkills());
-            freelancer.setHourlyRate(request.getHourlyRate());
-            freelancer.setBio(request.getBio());
-            freelancer.setProfileUrl(request.getProfileUrl());
-            freelancer.setUser(savedUser);
-            freelancerRepo.save(freelancer);
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
         }
 
-        return savedUser;
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(request.getRole());
+        return userRepository.save(user);
     }
 }

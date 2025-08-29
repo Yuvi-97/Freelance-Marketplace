@@ -25,44 +25,24 @@ function SignIn() {
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
       console.log(token);
-      // Fetch user details
-      const userRes = await axios.get(
-        `${API_BASE}/api/users/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      // Minimal user fetch for role-only decision
+      const userRes = await axios.get(`${API_BASE}/api/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const { username: fetchedUsername, role } = userRes.data;
       localStorage.setItem("username", fetchedUsername);
       localStorage.setItem("role", role);
 
-      if (role === "CLIENT") {
-        const clientRes = await axios.get(
-          `${API_BASE}/api/clients/user/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const { id: clientId } = clientRes.data;
-        localStorage.setItem("clientId", clientId);
-
-        navigate("/client-dashboard");
-      } else if (role === "FREELANCER") {
-        const freelancerRes = await axios.get(
-          `${API_BASE}/api/freelancers/user/${userId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        localStorage.setItem("freelancerId", freelancerRes.data.id);
-        navigate("/freelancer-dashboard");
-      } else {
-        navigate("/");
-      }
+      if (role === "CLIENT") navigate("/client-dashboard");
+      else if (role === "FREELANCER") navigate("/freelancer-dashboard");
+      else navigate("/");
 
       window.dispatchEvent(new Event("login"));
     } catch (err) {
       console.error("Login failed:", err);
-      alert("Invalid username or password");
+      const serverMsg =
+        err?.response?.data?.message || err?.response?.data || err.message;
+      alert(serverMsg || "Invalid username or password");
     } finally {
       setLoading(false);
     }
@@ -95,11 +75,11 @@ function SignIn() {
           className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm"
         >
           <h2 className="text-2xl font-bold mb-2 text-center">Welcome Back</h2>
-          <p className="text-center mb-6">Sign in to your Freeverse Account</p>
+          <p className="text-center mb-6">Sign in with email or username</p>
 
           <div className="mb-4">
             <label className="block mb-1 font-medium" htmlFor="username">
-              Username
+              Email or Username
             </label>
             <input
               id="username"
@@ -108,7 +88,7 @@ function SignIn() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Enter your username"
+              placeholder="Enter your email or username"
             />
           </div>
 
@@ -127,14 +107,7 @@ function SignIn() {
             />
           </div>
 
-          <div className="text-right mb-6">
-            <a
-              href="/forgot-password"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Forgot password?
-            </a>
-          </div>
+          <div className="text-right mb-6"></div>
 
           <Button
             type="submit"
@@ -175,12 +148,12 @@ function SignIn() {
           </Button>
 
           <p className="text-center text-sm mt-4">
-            Don't have an Account?{" "}
+            Don't have an account?
             <a
               href="/signup"
-              className="text-blue-600 font-medium hover:underline"
+              className="text-blue-600 font-medium hover:underline ml-1"
             >
-              Sign Up
+              Create one
             </a>
           </p>
         </form>
