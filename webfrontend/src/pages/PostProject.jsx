@@ -41,6 +41,44 @@ function PostProject() {
       navigate("/login");
     }
   }, [navigate]);
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setMessage({
+        text: "You must be logged in as a client to post a project.",
+        type: "error",
+      });
+      navigate("/login");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    const fetchClientProfile = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/api/clients/user/${userId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res?.data?.id) {
+          localStorage.setItem("clientId", String(res.data.id));
+          console.log("Resolved clientId:", res.data.id);
+        } else {
+          console.warn("Client profile response missing id:", res?.data);
+        }
+      } catch (err) {
+        console.error(
+          "Client profile not found",
+          err.response?.data || err.message
+        );
+        setMessage({
+          text: "Client profile not found. Please complete your client profile before posting.",
+          type: "error",
+        });
+        // don't navigate away here; allow user to see message (or navigate if you prefer)
+      }
+    };
+
+    fetchClientProfile();
+  }, [API_BASE, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,53 +90,69 @@ function PostProject() {
       });
       return;
     }
-    if (budget <= 0) {
+    if (parseFloat(budget) <= 0) {
       setMessage({ text: "Budget must be a positive number.", type: "error" });
       return;
     }
 
-    let finalCategories = categories.filter((cat) => cat !== "Other");
+    const clientId = localStorage.getItem("userId");
+    if (!clientId) {
+      setMessage({
+        text: "You must be logged in to post a project.",
+        type: "error",
+      });
+      navigate("/login");
+      return;
+    }
+
+    const finalCategories = categories.filter((cat) => cat !== "Other");
     if (categories.includes("Other") && otherCategory.trim() !== "") {
       finalCategories.push(otherCategory.trim());
     }
 
-    const clientId = localStorage.getItem("userId");
+    // FIX 3: convert deadline to local date string (YYYY-MM-DD)
+    const deadlineLocal = new Date(deadline).toISOString().split("T")[0];
+    const clientProfileId = localStorage.getItem("clientId");
 
     const projectData = {
       title,
       description,
       budget: parseFloat(budget),
-      deadline,
+      deadline: deadlineLocal,
       status,
-      createdDate: new Date().toISOString().split("T")[0],
       categories: finalCategories,
-      client: { id: clientId },
+      client: { id: parseInt(clientProfileId) },
     };
+
+    console.log("POST URL:", `${API_BASE}/api/projects`);
+    console.log("projectData:", projectData);
 
     try {
       setLoading(true);
-      await axios.post(`${API_BASE}/api/projects`, projectData, {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(`${API_BASE}/api/projects`, projectData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
 
+      console.log("Project created:", res.data);
       setMessage({ text: "✅ Project posted successfully!", type: "success" });
       setTimeout(() => navigate("/my-projects"), 1500);
     } catch (err) {
       console.error("Error posting project:", err);
-
+      // show server response to find validation message
+      console.error("server response data:", err.response?.data);
+      setMessage({
+        text:
+          err.response?.data?.message ||
+          JSON.stringify(err.response?.data) ||
+          "❌ Failed to post project. Please try again.",
+        type: "error",
+      });
       if (err.response?.status === 401) {
-        setMessage({
-          text: "⚠️ Unauthorized. Please login to continue.",
-          type: "error",
-        });
         setTimeout(() => navigate("/login"), 2000);
-      } else {
-        setMessage({
-          text: "❌ Failed to post project. Please try again.",
-          type: "error",
-        });
       }
     } finally {
       setLoading(false);

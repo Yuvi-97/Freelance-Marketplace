@@ -13,11 +13,13 @@ function FreelancerProfile() {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await axios.get(`${API_BASE}/api/freelancers/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFreelancer(res.data);
+        const res = await axios.get(
+          `${API_BASE}/api/profile/freelancer/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setFreelancer(res.data); // expects fields: name, skills, hourlyRate, bio, location, profileUrl
       } catch (err) {
+        console.error("Fetch freelancer failed", err?.response || err);
         setFreelancer(null);
       } finally {
         setLoading(false);
