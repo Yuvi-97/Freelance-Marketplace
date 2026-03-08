@@ -13,6 +13,7 @@ import MyProjects from "./pages/MyProject.jsx";
 import PostProject from "./pages/PostProject.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
+import ClientProfile from "./pages/ClientProfile.jsx";
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState("");
@@ -37,6 +38,7 @@ function App() {
         <Route path="/my-projects" element={<MyProjects />} />
         <Route path="/my-applications" element={<ApplicationsPage />} />
         <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+        <Route path="/client/:id" element={<ClientProfile />} />
       </Routes>
       {!isAuthRoute && <Footer />}
     </>

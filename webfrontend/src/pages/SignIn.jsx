@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { FiMail, FiLock, FiLoader } from "react-icons/fi";
+import { FiLoader, FiLock, FiMail } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
 import bgImage from "../assets/authbg.jpeg";
 import Button from "../component/ui/Button";
 
@@ -24,7 +24,6 @@ function SignIn() {
       const { token, userId } = res.data;
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
-      
 
       // fetch role
       const userRes = await axios.get(`${API_BASE}/api/users/${userId}`, {
@@ -33,6 +32,61 @@ function SignIn() {
       const { username: fetchedUsername, role } = userRes.data;
       localStorage.setItem("username", fetchedUsername);
       localStorage.setItem("role", role);
+
+      // fetch and store profile ids (use JWT). try freelancer then client.
+      const headers = { Authorization: `Bearer ${token}` };
+
+      // FREELANCER ID (uses /api/freelancers/user/{userId})
+      try {
+        const fr = await axios.get(
+          `${API_BASE}/api/freelancers/user/${userId}`,
+          { headers }
+        );
+        console.log("Freelancer lookup:", fr.status, fr.data);
+        const fid = fr?.data?.id;
+        if (Number.isFinite(Number(fid))) {
+          localStorage.setItem("freelancerId", String(fid));
+        } else {
+          console.warn("No freelancer id in response");
+          localStorage.removeItem("freelancerId");
+        }
+      } catch (err) {
+        console.error(
+          "Freelancer lookup failed:",
+          err?.response?.status,
+          err?.response?.data || err.message
+        );
+        localStorage.removeItem("freelancerId");
+      }
+
+      // CLIENT ID (still /api/clients/user/{userId})
+      try {
+        const cl = await axios.get(`${API_BASE}/api/clients/user/${userId}`, {
+          headers,
+        });
+        console.log("Client lookup:", cl.status, cl.data);
+        const cid = cl?.data?.id;
+        if (Number.isFinite(Number(cid))) {
+          localStorage.setItem("clientId", String(cid));
+        } else {
+          console.warn("No client id in response");
+          localStorage.removeItem("clientId");
+        }
+      } catch (err) {
+        console.error(
+          "Client lookup failed:",
+          err?.response?.status,
+          err?.response?.data || err.message
+        );
+        localStorage.removeItem("clientId");
+      }
+
+      console.log("SignIn stored IDs:", {
+        userId,
+        role,
+        freelancerId: localStorage.getItem("freelancerId"),
+        clientId: localStorage.getItem("clientId"),
+      });
 
       if (role === "CLIENT") navigate("/client-dashboard");
       else if (role === "FREELANCER") navigate("/freelancer-dashboard");

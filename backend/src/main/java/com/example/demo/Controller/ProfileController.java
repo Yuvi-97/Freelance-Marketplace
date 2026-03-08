@@ -59,6 +59,9 @@ public class ProfileController {
             profile.setClientName(req.getClientName());
             profile.setCompany(req.getCompany());
             profile.setPhone(req.getPhone());
+            if (req.getProfileUrl() != null) {
+                profile.setProfileUrl(req.getProfileUrl());
+            }
             clientProfileRepository.save(profile);
             return ResponseEntity.ok(ProfileResponse.fromClient(user, profile));
         } else if ("FREELANCER".equalsIgnoreCase(user.getRole())) {
@@ -68,6 +71,9 @@ public class ProfileController {
             profile.setHourlyRate(req.getHourlyRate());
             profile.setBio(req.getBio());
             profile.setEmail(user.getEmail());
+            if (req.getProfileUrl() != null) {
+                profile.setProfileUrl(req.getProfileUrl());
+            }
             profile.setProjects(profile.getProjects());
             freelancerRepository.save(profile);
             return ResponseEntity.ok(ProfileResponse.fromFreelancer(user, profile));

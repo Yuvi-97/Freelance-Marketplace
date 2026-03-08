@@ -30,25 +30,96 @@ function JobListings() {
   const handleAcceptProject = async (projectId) => {
     try {
       const token = localStorage.getItem("token");
-      const freelancerId = localStorage.getItem("freelancerId"); // assume stored after login
+      if (!token) {
+        alert("Please login as a freelancer to apply.");
+        return;
+      }
 
+      // DEBUG: log current storage
+      console.debug("Applying project:", { projectId, token });
+      console.debug(
+        "Stored freelancerId:",
+        localStorage.getItem("freelancerId")
+      );
+      console.debug("Stored userId:", localStorage.getItem("userId"));
+
+      // resolve freelancerId (prefer cached; else fetch by userId)
+      let freelancerId = localStorage.getItem("freelancerId");
+      if (
+        !freelancerId ||
+        freelancerId === "null" ||
+        freelancerId === "undefined"
+      ) {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+          alert("Missing userId. Please login.");
+          return;
+        }
+        console.debug(
+          "Resolving freelancerId via /api/profile/freelancer/user/{userId}:",
+          userId
+        );
+        try {
+          const res = await axios.get(
+            `${API_BASE}/api/profile/freelancer/user/${userId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          freelancerId = res?.data?.id && String(res.data.id);
+          console.debug(
+            "Resolved freelancerId:",
+            freelancerId,
+            "response:",
+            res.data
+          );
+          if (freelancerId) {
+            localStorage.setItem("freelancerId", freelancerId);
+          } else {
+            alert(
+              "Freelancer profile not found. Complete your profile before applying."
+            );
+            return;
+          }
+        } catch (err) {
+          console.error(
+            "Failed to resolve freelancer profile:",
+            err?.response || err
+          );
+          alert(
+            err?.response?.data?.message || "Freelancer profile not found."
+          );
+          return;
+        }
+      }
+
+      // final guard and numeric conversion
+      if (
+        !freelancerId ||
+        freelancerId === "null" ||
+        isNaN(Number(freelancerId))
+      ) {
+        alert(
+          "Invalid freelancer id. Please re-login or complete your profile."
+        );
+        return;
+      }
+
+      console.debug("PUT accept with freelancerId:", freelancerId);
       const res = await axios.put(
-        `${API_BASE}/api/projects/${projectId}/accept?freelancerId=${freelancerId}`,
+        `${API_BASE}/api/projects/${projectId}/accept`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
+          params: { freelancerId: Number(freelancerId) }, // send as number
         }
       );
 
       console.log("Project accepted:", res.data);
-
       fetchProjects();
-      // alert("You have successfully applied for this project!");
     } catch (err) {
       console.error("Error accepting project:", err);
-      alert("Failed to apply. Please try again.");
+      alert(
+        err?.response?.data?.message || "Failed to apply. Please try again."
+      );
     }
   };
 

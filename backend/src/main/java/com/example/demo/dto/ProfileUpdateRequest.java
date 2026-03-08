@@ -14,6 +14,9 @@ public class ProfileUpdateRequest {
     private String skills;
     private Double hourlyRate;
     private String bio;
+
+    // Shared fields
+    private String profileUrl;
 }
 
 

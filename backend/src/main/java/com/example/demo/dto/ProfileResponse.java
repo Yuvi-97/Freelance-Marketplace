@@ -25,6 +25,7 @@ public class ProfileResponse {
         r.clientName = c.getClientName();
         r.company = c.getCompany();
         r.phone = c.getPhone();
+        r.profileUrl = c.getProfileUrl();
         return r;
     }
     public static ProfileResponse fromFreelancer(User user, Freelancer f) {
@@ -33,6 +34,7 @@ public class ProfileResponse {
         r.skills = f.getSkills();
         r.hourlyRate = f.getHourlyRate();
         r.bio = f.getBio();
+        r.profileUrl = f.getProfileUrl();
         return r;
     }
     private Long userId;
@@ -40,6 +42,7 @@ public class ProfileResponse {
     private String username;
     private String email;
     private String role;
+    private String profileUrl;
 
     // Client fields
     private String clientName;
