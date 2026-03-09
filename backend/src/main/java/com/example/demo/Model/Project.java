@@ -23,7 +23,8 @@ public class Project {
     private String description;
     private Double budget;
     private LocalDate deadline;
-    private String status; 
+    @Enumerated(EnumType.STRING)
+    private ProjectStatus status = ProjectStatus.OPEN;
     private LocalDate createdDate;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -40,4 +41,8 @@ public class Project {
     @JoinColumn(name = "client_id")
     @JsonBackReference
     private ClientProfile client;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("project")
+    private java.util.List<ProjectApplication> applications = new ArrayList<>();
 }

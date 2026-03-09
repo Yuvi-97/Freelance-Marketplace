@@ -172,11 +172,10 @@ function PostProject() {
         {/* Inline message */}
         {message.text && (
           <div
-            className={`mb-4 p-3 rounded ${
-              message.type === "success"
+            className={`mb-4 p-3 rounded ${message.type === "success"
                 ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-700"
-            }`}
+              }`}
           >
             {message.text}
           </div>
@@ -208,7 +207,7 @@ function PostProject() {
 
         {/* Budget */}
         <div className="mb-4">
-          <label className="block font-medium mb-1">Budget (USD) *</label>
+          <label className="block font-medium mb-1">Budget (INR) *</label>
           <input
             type="number"
             min="0"

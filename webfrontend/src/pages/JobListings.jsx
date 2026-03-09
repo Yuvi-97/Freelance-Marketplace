@@ -6,6 +6,9 @@ function JobListings() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("Most Relevant");
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [coverLetter, setCoverLetter] = useState("");
   const API_BASE = process.env.REACT_APP_API_BASE_URL;
   useEffect(() => {
     fetchProjects();
@@ -14,7 +17,7 @@ function JobListings() {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem("token"); // get JWT token
-      const res = await axios.get(`${API_BASE}/api/projects/all`, {
+      const res = await axios.get(`${API_BASE}/api/projects/status/OPEN`, {
         headers: {
           Authorization: `Bearer ${token}`, // send JWT in header
         },
@@ -26,8 +29,14 @@ function JobListings() {
     }
   };
 
+  const triggerApplyModal = (project) => {
+    setSelectedProject(project);
+    setShowApplyModal(true);
+    setCoverLetter("");
+  }
+
   // inside JobListings component
-  const handleAcceptProject = async (projectId) => {
+  const handleApplyToProject = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -35,15 +44,7 @@ function JobListings() {
         return;
       }
 
-      // DEBUG: log current storage
-      console.debug("Applying project:", { projectId, token });
-      console.debug(
-        "Stored freelancerId:",
-        localStorage.getItem("freelancerId")
-      );
-      console.debug("Stored userId:", localStorage.getItem("userId"));
-
-      // resolve freelancerId (prefer cached; else fetch by userId)
+      // resolve freelancerId
       let freelancerId = localStorage.getItem("freelancerId");
       if (
         !freelancerId ||
@@ -55,22 +56,12 @@ function JobListings() {
           alert("Missing userId. Please login.");
           return;
         }
-        console.debug(
-          "Resolving freelancerId via /api/profile/freelancer/user/{userId}:",
-          userId
-        );
         try {
           const res = await axios.get(
             `${API_BASE}/api/profile/freelancer/user/${userId}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           freelancerId = res?.data?.id && String(res.data.id);
-          console.debug(
-            "Resolved freelancerId:",
-            freelancerId,
-            "response:",
-            res.data
-          );
           if (freelancerId) {
             localStorage.setItem("freelancerId", freelancerId);
           } else {
@@ -80,10 +71,6 @@ function JobListings() {
             return;
           }
         } catch (err) {
-          console.error(
-            "Failed to resolve freelancer profile:",
-            err?.response || err
-          );
           alert(
             err?.response?.data?.message || "Freelancer profile not found."
           );
@@ -91,34 +78,37 @@ function JobListings() {
         }
       }
 
-      // final guard and numeric conversion
+      // final guard
       if (
         !freelancerId ||
         freelancerId === "null" ||
         isNaN(Number(freelancerId))
       ) {
-        alert(
-          "Invalid freelancer id. Please re-login or complete your profile."
-        );
+        alert("Invalid freelancer id. Please re-login or complete your profile.");
         return;
       }
 
-      console.debug("PUT accept with freelancerId:", freelancerId);
-      const res = await axios.put(
-        `${API_BASE}/api/projects/${projectId}/accept`,
-        {},
+      const res = await axios.post(
+        `${API_BASE}/api/projects/${selectedProject.id}/applications`,
         {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { freelancerId: Number(freelancerId) }, // send as number
+          freelancerId: Number(freelancerId),
+          coverLetter: coverLetter
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
 
-      console.log("Project accepted:", res.data);
-      fetchProjects();
+      console.log("Application submitted:", res.data);
+      alert("Successfully applied to the project!");
+      setShowApplyModal(false);
+      fetchProjects(); 
     } catch (err) {
-      console.error("Error accepting project:", err);
+      console.error("Error applying to project:", err);
       alert(
-        err?.response?.data?.message || "Failed to apply. Please try again."
+        typeof err?.response?.data === 'string' 
+          ? err?.response?.data 
+          : "Failed to apply. Please try again or you might have already applied."
       );
     }
   };
@@ -266,7 +256,7 @@ function JobListings() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleAcceptProject(proj.id)}
+                      onClick={() => triggerApplyModal(proj)}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
                     >
                       Apply Now
@@ -277,12 +267,54 @@ function JobListings() {
             ))}
             {filteredProjects.length === 0 && (
               <p className="text-center text-gray-500 mt-10">
-                No projects found.
+                No currently open projects found matching your search.
               </p>
             )}
           </div>
         </div>
       </div>
+
+      {/* Application Modal */}
+      {showApplyModal && selectedProject && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-2 text-gray-800">
+              Apply to {selectedProject.title}
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Budget: ${selectedProject.budget}
+            </p>
+
+            <label className="block text-gray-700 font-medium mb-2">
+              Why are you a fast fit? (Cover Letter)
+            </label>
+            <textarea
+              value={coverLetter}
+              onChange={(e) => setCoverLetter(e.target.value)}
+              placeholder="Outline your skills and why you're ready to take on this project..."
+              className="w-full border rounded p-3 mb-4 h-32 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+
+            <div className="flex justify-end gap-3 text-sm">
+              <button
+                type="button"
+                onClick={() => setShowApplyModal(false)}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyToProject}
+                disabled={!coverLetter.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium disabled:bg-blue-300"
+              >
+                Submit Application
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

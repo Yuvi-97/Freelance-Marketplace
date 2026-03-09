@@ -12,6 +12,7 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByClientId(Long clientId);
     List<Project> findByAssignedFreelancerId(Long freelancerId);
+    List<Project> findByStatus(ProjectStatus status);
 
     @Query("SELECT p FROM Project p WHERE p.budget BETWEEN :min AND :max")
     List<Project> findByBudgetBetween(@Param("min") Double min, @Param("max") Double max);

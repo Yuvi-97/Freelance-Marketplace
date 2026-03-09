@@ -14,6 +14,8 @@ import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.ArrayList;
 
 @Entity
 @Data
@@ -34,6 +36,10 @@ public class Freelancer {
     private String profileUrl;
     @OneToMany(mappedBy = "assignedFreelancer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects;
+
+    @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("freelancer")
+    private List<ProjectApplication> applications = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)

@@ -4,23 +4,29 @@ import { Link } from "react-router-dom";
 
 function ProjectCard({ project }) {
   const getStatusBadge = (status) => {
-    console.log(project);
-    switch (status?.toLowerCase()) {
-      case "completed":
+    switch (status?.toUpperCase()) {
+      case "COMPLETED":
         return (
-          <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
+          <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-bold">
             COMPLETED
           </span>
         );
-      case "in progress":
+      case "IN_PROGRESS":
         return (
-          <span className="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium">
+          <span className="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-bold">
             IN PROGRESS
           </span>
         );
+      case "ASSIGNED":
+        return (
+          <span className="px-3 py-1 text-xs rounded-full bg-purple-100 text-purple-700 font-bold">
+            ASSIGNED
+          </span>
+        );
+      case "OPEN":
       default:
         return (
-          <span className="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-700 font-medium">
+          <span className="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-700 font-bold">
             OPEN
           </span>
         );

@@ -11,6 +11,11 @@ function MyProjects() {
   const [editingProject, setEditingProject] = useState(null);
   const [editForm, setEditForm] = useState({ title: "", description: "", budget: "" });
 
+  const [showApplicantsModal, setShowApplicantsModal] = useState(false);
+  const [selectedProjectForApplicants, setSelectedProjectForApplicants] = useState(null);
+  const [applicants, setApplicants] = useState([]);
+  const [loadingApplicants, setLoadingApplicants] = useState(false);
+
   const clientId = localStorage.getItem("clientId");
   const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -69,6 +74,43 @@ function MyProjects() {
     }
   };
 
+  const handleViewApplicants = async (project) => {
+    setSelectedProjectForApplicants(project);
+    setShowApplicantsModal(true);
+    setLoadingApplicants(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${API_BASE}/api/projects/${project.id}/applications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setApplicants(res.data);
+    } catch (err) {
+      console.error("Error fetching applicants:", err);
+    } finally {
+      setLoadingApplicants(false);
+    }
+  };
+
+  const handleAcceptApplicant = async (applicationId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${API_BASE}/api/projects/${selectedProjectForApplicants.id}/applications/${applicationId}/accept`,
+        null,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { clientId: clientId },
+        }
+      );
+      alert("Successfully assigned freelancer to the project!");
+      setShowApplicantsModal(false);
+      fetchProjects(); // Refresh project list to update badges
+    } catch (err) {
+      console.error("Error accepting applicant:", err);
+      alert(err.response?.data?.message || err.response?.data || "Failed to accept applicant");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -110,19 +152,31 @@ function MyProjects() {
                 <ProjectCard project={project} />
 
                 {/* Action buttons at bottom */}
-                <div className="mt-4 flex justify-end gap-3">
-                  <button
-                    onClick={() => handleEditClick(project)}
-                    className="p-2 bg-yellow-400 text-white rounded-full hover:bg-yellow-500"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(project.id)}
-                    className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-                  >
-                    <FaTrash />
-                  </button>
+                <div className="mt-4 flex flex-col sm:flex-row justify-between gap-3">
+                  <div>
+                    {project.status === "OPEN" && (
+                      <button
+                        onClick={() => handleViewApplicants(project)}
+                        className="px-3 py-2 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-200"
+                      >
+                        View Applicants
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditClick(project)}
+                      className="p-2 bg-yellow-400 text-white rounded-full hover:bg-yellow-500"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(project.id)}
+                      className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -177,6 +231,79 @@ function MyProjects() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* Applicants Modal */}
+        {showApplicantsModal && selectedProjectForApplicants && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl shadow-xl max-h-[90vh] flex flex-col">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">
+                  Applicants for {selectedProjectForApplicants.title}
+                </h2>
+                <button
+                  onClick={() => setShowApplicantsModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-2">
+                {loadingApplicants ? (
+                  <div className="flex justify-center p-8">
+                    <FaSpinner className="animate-spin text-indigo-600" size={24} />
+                  </div>
+                ) : applicants.length === 0 ? (
+                  <p className="text-gray-500 text-center p-8">No applications yet.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {applicants.map((app) => (
+                      <div key={app.id} className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <Link to={`/freelancer/${app.freelancer.id}`} className="font-semibold text-lg text-indigo-700 hover:underline">
+                              {app.freelancer.name}
+                            </Link>
+                            <p className="text-sm text-gray-600">{app.freelancer.skills}</p>
+                            <p className="text-xs text-gray-500 mt-1">Applied: {new Date(app.appliedAt).toLocaleDateString()}</p>
+                          </div>
+                          {app.status === "PENDING" && (
+                            <button
+                                onClick={() => handleAcceptApplicant(app.id)}
+                                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition"
+                            >
+                                Accept Intern
+                            </button>
+                          )}
+                          {app.status === "ACCEPTED" && (
+                            <span className="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-full">ACCEPTED</span>
+                          )}
+                          {app.status === "REJECTED" && (
+                            <span className="px-3 py-1 bg-red-100 text-red-700 font-bold text-xs rounded-full">REJECTED</span>
+                          )}
+                        </div>
+                        
+                        <div className="mt-4 bg-white p-3 rounded border text-sm text-gray-700 whitespace-pre-wrap">
+                          <p className="font-semibold mb-1 text-xs text-gray-500 uppercase">Cover Letter</p>
+                          {app.coverLetter || <span className="italic text-gray-400">No cover letter provided.</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => setShowApplicantsModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
