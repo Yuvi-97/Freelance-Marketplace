@@ -24,13 +24,17 @@ function MyProjects() {
   }, [clientId]);
 
   const fetchProjects = async () => {
+    
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await axios.get(`${API_BASE}/api/projects/client/${clientId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProjects(res.data);
+
+      console.log("API RESPONSE:", res.data);
+
+setProjects(res.data);
     } catch (err) {
       console.error("Error fetching projects:", err);
     } finally {

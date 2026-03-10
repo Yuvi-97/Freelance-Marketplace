@@ -44,7 +44,14 @@ function ClientProfile() {
       );
 
       const newUrl = res.data.secure_url;
+      console.log(newUrl);
       setClient((prev) => ({ ...prev, profileUrl: newUrl }));
+
+      // store in localStorage so header updates
+      localStorage.setItem("profileUrl", newUrl);
+
+      // trigger header refresh
+      window.dispatchEvent(new Event("login"));
 
       const token = localStorage.getItem("token");
       if (token) {

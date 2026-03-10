@@ -1,5 +1,12 @@
 package com.example.demo.Service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.demo.Model.ApplicationStatus;
 import com.example.demo.Model.Freelancer;
 import com.example.demo.Model.Project;
@@ -8,12 +15,6 @@ import com.example.demo.Model.ProjectStatus;
 import com.example.demo.Repository.FreelancerRepository;
 import com.example.demo.Repository.ProjectApplicationRepository;
 import com.example.demo.Repository.ProjectRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProjectApplicationService {
@@ -52,7 +53,9 @@ public class ProjectApplicationService {
 
         return projectApplicationRepository.save(application);
     }
-
+    public List<ProjectApplication> getApplicationsForFreelancer(Long freelancerId) {
+        return projectApplicationRepository.findByFreelancerId(freelancerId);
+    }
     public List<ProjectApplication> getApplicationsForProject(Long projectId) {
         return projectApplicationRepository.findByProjectId(projectId);
     }

@@ -35,10 +35,11 @@ public class Freelancer {
     private LocalDate joinedDate;
     private String profileUrl;
     @OneToMany(mappedBy = "assignedFreelancer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("assignedFreelancer")
     private List<Project> projects;
 
     @OneToMany(mappedBy = "freelancer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("freelancer")
+   @JsonIgnoreProperties({"freelancer","project"})
     private List<ProjectApplication> applications = new ArrayList<>();
 
     @OneToOne

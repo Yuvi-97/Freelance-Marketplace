@@ -73,11 +73,11 @@ function Header() {
   };
 
   const avatarContent = profileUrl ? (
-    <img
-      src={profileUrl}
-      alt="Profile"
-      className="w-9 h-9 rounded-full object-cover border-2 border-indigo-500"
-    />
+      <img
+        src={profileUrl}
+        alt="Profile"
+        className="w-9 h-9 rounded-full object-cover border-2 border-indigo-500 shadow-md hover:scale-105 transition"
+      />
   ) : (
     <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold border-2 border-indigo-400">
       {username ? username.charAt(0).toUpperCase() : "U"}

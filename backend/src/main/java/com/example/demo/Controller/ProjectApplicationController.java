@@ -55,4 +55,14 @@ public class ProjectApplicationController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/freelancer/{freelancerId}")
+    public ResponseEntity<List<ProjectApplication>> getApplicationsForFreelancer(
+            @PathVariable Long freelancerId) {
+
+        List<ProjectApplication> applications =
+                projectApplicationService.getApplicationsForFreelancer(freelancerId);
+
+        return ResponseEntity.ok(applications);
+    }
 }

@@ -20,7 +20,7 @@ export default function ApplicationsPage() {
         }
 
         const res = await axios.get(
-          `${API_BASE}/api/projects/freelancer/${freelancerId}`,
+          `${API_BASE}/api/applications/freelancer/${freelancerId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -53,18 +53,20 @@ export default function ApplicationsPage() {
         </p>
       ) : (
         <div className="grid gap-6">
-          {projects.map((proj) => (
+          {projects.map((app) => (
             <div
-              key={proj.id}
+              key={app.id}
               className="p-4 border rounded-lg shadow hover:shadow-md transition bg-white"
             >
-              <h2 className="text-xl font-semibold">{proj.title}</h2>
-              <p className="text-gray-600">{proj.description}</p>
+              <h2 className="text-xl font-semibold">{app.project.title}</h2>
+              <p className="text-gray-600">{app.project.description}</p>
+
               <p className="text-sm text-gray-500 mt-2">
-                Budget: ${proj.budget}
+                Budget: ${app.project.budget}
               </p>
+
               <p className="text-sm text-gray-500">
-                Status: <span className="font-medium">{proj.status}</span>
+                Status: <span className="font-medium">{app.status}</span>
               </p>
             </div>
           ))}
