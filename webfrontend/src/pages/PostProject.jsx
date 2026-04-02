@@ -73,7 +73,6 @@ function PostProject() {
           text: "Client profile not found. Please complete your client profile before posting.",
           type: "error",
         });
-        // don't navigate away here; allow user to see message (or navigate if you prefer)
       }
     };
 
@@ -205,7 +204,7 @@ function PostProject() {
           ></textarea>
         </div>
 
-        {/* Budget */}
+        Budget
         <div className="mb-4">
           <label className="block font-medium mb-1">Budget (INR) *</label>
           <input
@@ -240,7 +239,7 @@ function PostProject() {
             onChange={(e) => setStatus(e.target.value)}
           >
             <option value="OPEN">OPEN</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
+            <option value="IN_PROGRESS">IN PROGRESS</option>
             <option value="COMPLETED">COMPLETED</option>
           </select>
         </div>
