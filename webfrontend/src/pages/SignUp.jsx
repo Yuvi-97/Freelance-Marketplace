@@ -116,10 +116,10 @@ function SignUp() {
       </div>
 
       {/* Right Form Panel */}
-      <div className="w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-24 bg-gray-50 min-h-screen relative z-10 overflow-y-auto overflow-x-hidden">
+      <div className="w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-24 bg-white min-h-screen relative z-10 overflow-y-auto overflow-x-hidden">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 pt-4 pb-4 px-6 sm:px-8"
+          className="w-full max-w-lg bg-white pt-4 pb-4 px-6 sm:px-8"
         >
           <div className="mb-2">
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
