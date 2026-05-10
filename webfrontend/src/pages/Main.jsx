@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import heroBackground from "../assets/hero-background.jpg";
 import Button from "../component/ui/Button.jsx";
@@ -16,6 +17,31 @@ import Ratings from "../component/ui/Ratings.jsx";
 
 function Main() {
   const navigate = useNavigate();
+  const [topFreelancers, setTopFreelancers] = useState([]);
+  const [loadingTop, setLoadingTop] = useState(true);
+
+  useEffect(() => {
+    const loadTop = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:8080/api/reviews/top?limit=3",
+        );
+        if (!res.ok) throw new Error((await res.text()) || res.statusText);
+        const data = await res.json(); // expects [{ freelancer: {...}, averageRating: 4.5 }, ...]
+        setTopFreelancers(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("Failed to load top freelancers", e);
+        setTopFreelancers([]);
+      } finally {
+        setLoadingTop(false);
+      }
+    };
+    loadTop();
+  }, []);
+
+  // ensure exactly 3 slots (fill with null placeholders)
+  const slots = [...topFreelancers];
+  while (slots.length < 3) slots.push(null);
 
   return (
     <div className="App">
@@ -60,24 +86,12 @@ function Main() {
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-4 mt-8 p-4 pb-20">
-          <div>
-            <Card Icon={FaCode} title="Web Developers" jobs={120} />
-          </div>
-          <div>
-            <Card Icon={FaPaintBrush} title="Graphic Designers" jobs={80} />
-          </div>
-          <div>
-            <Card Icon={FaChartLine} title="Digital Marketers" jobs={100} />
-          </div>
-          <div>
-            <Card Icon={FaPenFancy} title="Content Writers" jobs={60} />
-          </div>
-          <div>
-            <Card Icon={FaSearch} title="SEO Specialists" jobs={90} />
-          </div>
-          <div>
-            <Card Icon={FaDatabase} title="Data Analysts" jobs={110} />
-          </div>
+          <Card Icon={FaCode} title="Web Developers" />
+          <Card Icon={FaPaintBrush} title="Graphic Designers" />
+          <Card Icon={FaChartLine} title="Digital Marketers" />
+          <Card Icon={FaPenFancy} title="Content Writers" />
+          <Card Icon={FaSearch} title="SEO Specialists" />
+          <Card Icon={FaDatabase} title="Data Analysts" />
         </div>
       </div>
       <div className="flex flex-col items-center justify-center mt-10 space-y-4">
@@ -88,38 +102,45 @@ function Main() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-16 mt-8 pb-20">
-        <FreelancerCard
-          image="https://randomuser.me/api/portraits/women/44.jpg"
-          name="Sarah Johnson"
-          role="Full-Stack Developer"
-          rate={85}
-          rating={4.9}
-          location="San Francisco, CA"
-          description="Experienced full-stack developer with 8+ years building scalable web applications..."
-          skills={["React", "Node.js", "TypeScript", "GraphQL"]}
-        />
-
-        <FreelancerCard
-          image="https://randomuser.me/api/portraits/men/32.jpg"
-          name="Marcus Chen"
-          role="UI/UX Designer"
-          rate={75}
-          rating={4.8}
-          location="New York, NY"
-          description="Creative designer specializing in modern, user-centered designs that drive engagement..."
-          skills={["Figma", "Adobe XD", "Prototyping", "Illustrator"]}
-        />
-
-        <FreelancerCard
-          image="https://randomuser.me/api/portraits/women/68.jpg"
-          name="Emily Rodriguez"
-          role="Frontend Developer"
-          rate={70}
-          rating={4.9}
-          location="Austin, TX"
-          description="Frontend specialist creating beautiful, responsive interfaces with a focus on usability..."
-          skills={["React", "Vue.js", "CSS3", "Tailwind"]}
-        />
+        {loadingTop ? (
+          <p className="text-gray-600">Loading top freelancers…</p>
+        ) : (
+          slots.map((entry, idx) =>
+            entry ? (
+              <FreelancerCard
+                key={entry.freelancer.id ?? idx}
+                image={
+                  entry.freelancer.profileUrl ||
+                  `https://i.pravatar.cc/150?u=${entry.freelancer.id ?? idx}`
+                }
+                name={
+                  entry.freelancer.name ||
+                  entry.freelancer.user?.username ||
+                  "Anonymous"
+                }
+                role={entry.freelancer.skills ?? ""}
+                rate={entry.freelancer.hourlyRate ?? 0}
+                rating={entry.averageRating ?? 0}
+                location={""}
+                description={entry.freelancer.bio ?? ""}
+                skills={
+                  entry.freelancer.skills
+                    ? entry.freelancer.skills.split(",").map((s) => s.trim())
+                    : []
+                }
+              />
+            ) : (
+              <div
+                key={`empty-${idx}`}
+                className="w-80 bg-white shadow-md rounded-xl p-6 flex flex-col items-center justify-center text-gray-500"
+              >
+                <div className="w-24 h-24 bg-gray-100 rounded-full mb-4" />
+                <p className="text-xl font-semibold">Available Soon</p>
+                <p className="text-sm mt-2">More top freelancers coming</p>
+              </div>
+            ),
+          )
+        )}
       </div>
 
       <Ratings />
