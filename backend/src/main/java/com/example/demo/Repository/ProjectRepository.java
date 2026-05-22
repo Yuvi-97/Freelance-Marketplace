@@ -10,8 +10,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
+
     List<Project> findByClientId(Long clientId);
+
     List<Project> findByAssignedFreelancerId(Long freelancerId);
+
+    List<Project> findByAssignedFreelancerIdAndStatus(Long freelancerId, ProjectStatus status);
+
     List<Project> findByStatus(ProjectStatus status);
 
     @Query("SELECT p FROM Project p WHERE p.budget BETWEEN :min AND :max")

@@ -80,12 +80,16 @@ public User registerUser(RegisterRequest request) {
     if (request.getRole().equals("CLIENT")) {
         ClientProfile cp = new ClientProfile();
         cp.setUser(savedUser);
+        cp.setContactEmail(savedUser.getEmail());
         clientProfileRepository.save(cp);
     }
 
     if (request.getRole().equals("FREELANCER")) {
         Freelancer freelancer = new Freelancer();
         freelancer.setUser(savedUser);
+        freelancer.setEmail(savedUser.getEmail());
+        freelancer.setAvailableForWork(true);
+        freelancer.setJoinedDate(java.time.LocalDate.now());
         freelancerRepository.save(freelancer);
     }
 

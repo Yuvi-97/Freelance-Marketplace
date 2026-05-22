@@ -6,12 +6,12 @@ import Card from "../component/ui/Card.jsx";
 import FreelancerCard from "../component/ui/FreelancerCard.jsx";
 
 import {
-  FaChartLine,
-  FaCode,
-  FaDatabase,
-  FaPaintBrush,
-  FaPenFancy,
-  FaSearch,
+    FaChartLine,
+    FaCode,
+    FaDatabase,
+    FaPaintBrush,
+    FaPenFancy,
+    FaSearch,
 } from "react-icons/fa";
 import Ratings from "../component/ui/Ratings.jsx";
 
@@ -23,8 +23,9 @@ function Main() {
   useEffect(() => {
     const loadTop = async () => {
       try {
+        const apiBase = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
         const res = await fetch(
-          "http://localhost:8080/api/reviews/top?limit=3",
+          `${apiBase}/api/reviews/top?limit=3`,
         );
         if (!res.ok) throw new Error((await res.text()) || res.statusText);
         const data = await res.json(); // expects [{ freelancer: {...}, averageRating: 4.5 }, ...]

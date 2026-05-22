@@ -14,6 +14,8 @@ import com.example.demo.Model.User;
 import com.example.demo.Repository.ClientProfileRepository;
 import com.example.demo.Repository.FreelancerRepository;
 import com.example.demo.Repository.UserRepository;
+import com.example.demo.Service.ClientProfileService;
+import com.example.demo.Service.FreelancerService;
 import com.example.demo.dto.ClientProfileSetupRequest;
 import com.example.demo.dto.FreelancerProfileSetupRequest;
 
@@ -27,16 +29,16 @@ public class ProfileSetupController {
     private final UserRepository userRepository;
     private final ClientProfileRepository clientProfileRepository;
     private final FreelancerRepository freelancerRepository;
+    private final FreelancerService freelancerService;
+    private final ClientProfileService clientProfileService;
 
     @PostMapping("/client")
     public ResponseEntity<ClientProfile> setupClient(@RequestBody ClientProfileSetupRequest request) {
         User currentUser = getCurrentUser();
         ClientProfile profile = clientProfileRepository.findByUser(currentUser).orElseGet(ClientProfile::new);
         profile.setUser(currentUser);
-        profile.setClientName(request.getClientName());
-        profile.setCompany(request.getCompany());
         profile.setContactEmail(currentUser.getEmail());
-        profile.setPhone(request.getPhone());
+        clientProfileService.applySetupRequest(profile, request);
         return ResponseEntity.ok(clientProfileRepository.save(profile));
     }
 
@@ -45,19 +47,15 @@ public class ProfileSetupController {
         User currentUser = getCurrentUser();
         Freelancer profile = freelancerRepository.findByUser(currentUser).orElseGet(Freelancer::new);
         profile.setUser(currentUser);
-        profile.setName(request.getName());
         profile.setEmail(currentUser.getEmail());
-        profile.setSkills(request.getSkills());
-        profile.setHourlyRate(request.getHourlyRate());
-        profile.setBio(request.getBio());
+        freelancerService.applySetupRequest(profile, request);
         return ResponseEntity.ok(freelancerRepository.save(profile));
     }
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
-
-

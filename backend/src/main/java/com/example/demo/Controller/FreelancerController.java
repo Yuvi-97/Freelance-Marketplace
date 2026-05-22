@@ -3,16 +3,12 @@ package com.example.demo.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.Model.Freelancer;
 import com.example.demo.Service.FreelancerService;
+import com.example.demo.dto.FreelancerDashboardDto;
 
 @RestController
 @RequestMapping("/api/freelancers")
@@ -21,19 +17,14 @@ public class FreelancerController {
     @Autowired
     private FreelancerService freelancerService;
 
-    @PostMapping
-    public Freelancer createFreelancer(@RequestBody Freelancer freelancer) {
-        return freelancerService.createFreelancer(freelancer);
-    }
-
     @GetMapping
     public List<Freelancer> getAllFreelancers() {
         return freelancerService.getAllFreelancers();
     }
 
     @GetMapping("/{id}")
-    public Freelancer getFreelancer(@PathVariable Long id) {
-        return freelancerService.getFreelancerById(id);
+    public ResponseEntity<Freelancer> getFreelancer(@PathVariable Long id) {
+        return ResponseEntity.ok(freelancerService.getFreelancerById(id));
     }
 
     @GetMapping("/search")
@@ -49,7 +40,12 @@ public class FreelancerController {
     }
 
     @GetMapping("/user/{userId}")
-    public Freelancer getFreelancerByUserId(@PathVariable Long userId) {
-        return freelancerService.getFreelancerByUserId(userId);
+    public ResponseEntity<Freelancer> getFreelancerByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(freelancerService.getFreelancerByUserId(userId));
+    }
+
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<FreelancerDashboardDto> getFreelancerDashboard(@PathVariable Long id) {
+        return ResponseEntity.ok(freelancerService.getDashboard(id));
     }
 }

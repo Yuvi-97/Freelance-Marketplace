@@ -9,6 +9,7 @@ function JobListings() {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [coverLetter, setCoverLetter] = useState("");
+  const [proposedRate, setProposedRate] = useState("");
   const API_BASE = process.env.REACT_APP_API_BASE_URL;
   useEffect(() => {
     fetchProjects();
@@ -33,6 +34,7 @@ function JobListings() {
     setSelectedProject(project);
     setShowApplyModal(true);
     setCoverLetter("");
+    setProposedRate("");
   }
 
   // inside JobListings component
@@ -283,15 +285,16 @@ function JobListings() {
             </h2>
             <p className="text-sm text-gray-600 mb-4">
               Budget: ${selectedProject.budget}
+              {selectedProject.deadline && ` · Deadline: ${new Date(selectedProject.deadline).toLocaleDateString()}`}
             </p>
 
             <label className="block text-gray-700 font-medium mb-2">
-              Why are you a fast fit? (Cover Letter)
+              Cover Letter <span className="text-red-500">*</span>
             </label>
             <textarea
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
-              placeholder="Outline your skills and why you're ready to take on this project..."
+              placeholder="Describe your relevant experience and why you're the best fit for this project..."
               className="w-full border rounded p-3 mb-4 h-32 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
 

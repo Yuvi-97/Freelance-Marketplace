@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
 import axios from "axios";
+import { Star } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function Ratings() {
   const [reviews, setReviews] = useState([]);
@@ -11,7 +11,8 @@ function Ratings() {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/app-reviews");
+      const apiBase = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+      const response = await axios.get(`${apiBase}/api/app-reviews`);
 
       // Get only top 3 reviews
       setReviews(response.data.slice(0, 3));

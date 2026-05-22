@@ -37,11 +37,28 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/api/auth/login", "/api/auth/signup").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
+    // // Testing use below
+    // @Bean
+    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .csrf(AbstractHttpConfigurer::disable)
+    //         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    //         .sessionManagement(session -> session
+    //             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    //         )
+    //         .authorizeHttpRequests(auth -> auth
+    //             .anyRequest().permitAll()
+    //         );
+
+    //     return http.build();
+    // }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
