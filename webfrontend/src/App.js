@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import AboutPage from "./pages/AboutPage.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
 import ClientDashboard from "./pages/ClientDashboard.jsx";
+import ClientProfile from "./pages/ClientProfile.jsx";
 import Footer from "./pages/Fotter.jsx";
 import FreelancerDashboard from "./pages/FreelancerDashboard.jsx";
 import FreelancerProfile from "./pages/FreelancerProfile.jsx";
@@ -9,27 +11,24 @@ import Header from "./pages/Header.jsx";
 import JobListings from "./pages/JobListings.jsx";
 import Main from "./pages/Main.jsx";
 import ApplicationsPage from "./pages/MyApplication.jsx";
+import MyChats from "./pages/MyChats.jsx";
 import MyProjects from "./pages/MyProject.jsx";
 import PostProject from "./pages/PostProject.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
-import ClientProfile from "./pages/ClientProfile.jsx";
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState("");
   const location = useLocation();
-  const isAuthRoute =
-    location.pathname === "/login" || location.pathname === "/signup";
+  const isAuthRoute = location.pathname === "/login" || location.pathname === "/signup";
+  const isChatRoute = location.pathname.startsWith("/chat/");
   return (
     <>
-      {!isAuthRoute && <Header user={loggedInUser} />}
+      {!isAuthRoute && !isChatRoute && <Header user={loggedInUser} />}
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<SignIn />} />
-        <Route
-          path="/signup"
-          element={<SignUp onUserLoggedIn={setLoggedInUser} />}
-        />
+        <Route path="/signup" element={<SignUp onUserLoggedIn={setLoggedInUser} />} />
         <Route path="/post-project" element={<PostProject />} />
         <Route path="/job-listings" element={<JobListings />} />
         <Route path="/freelancer-dashboard" element={<FreelancerDashboard />} />
@@ -39,8 +38,10 @@ function App() {
         <Route path="/my-applications" element={<ApplicationsPage />} />
         <Route path="/freelancer/:id" element={<FreelancerProfile />} />
         <Route path="/client/:id" element={<ClientProfile />} />
+        <Route path="/chat/:projectId" element={<ChatPage />} />
+        <Route path="/my-chats" element={<MyChats />} />
       </Routes>
-      {!isAuthRoute && <Footer />}
+      {!isAuthRoute && !isChatRoute && <Footer />}
     </>
   );
 }

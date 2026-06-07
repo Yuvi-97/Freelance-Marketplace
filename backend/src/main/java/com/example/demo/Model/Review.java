@@ -4,17 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "reviews")
 public class Review {
 
     @Id
@@ -23,23 +20,32 @@ public class Review {
 
     private int rating; // 1 to 5
 
+    @Column(columnDefinition = "TEXT")
     private String comment;
 
     private LocalDate createdAt;
 
-    // Who gave review
-    @ManyToOne
+    // The project this review is tied to (prevents duplicate reviews per project)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    @JsonIgnoreProperties({"applications", "client", "assignedFreelancer", "categories"})
+    private Project project;
+
+    // Who gave the review
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "reviewer_id")
+    @JsonIgnoreProperties({"password"})
     private User reviewer;
 
-    // Freelancer being reviewed
-    @ManyToOne
+    // Freelancer being reviewed (null if reviewing a client)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "freelancer_id")
+    @JsonIgnoreProperties({"applications", "projects", "user"})
     private Freelancer freelancer;
 
-    // Client being reviewed
-    @ManyToOne
+    // Client being reviewed (null if reviewing a freelancer)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
+    @JsonIgnoreProperties({"projects", "user"})
     private ClientProfile client;
-
 }

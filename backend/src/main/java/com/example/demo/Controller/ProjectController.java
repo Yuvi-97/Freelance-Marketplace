@@ -98,4 +98,16 @@ public class ProjectController {
     public List<Project> getProjectsByStatus(@PathVariable ProjectStatus status) {
         return projectService.getProjectsByStatus(status);
     }
+
+    @PutMapping("/{projectId}/complete")
+    public ResponseEntity<?> completeProject(
+            @PathVariable Long projectId,
+            @RequestParam Long clientId) {
+        try {
+            Project completed = projectService.completeProject(projectId, clientId);
+            return ResponseEntity.ok(completed);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

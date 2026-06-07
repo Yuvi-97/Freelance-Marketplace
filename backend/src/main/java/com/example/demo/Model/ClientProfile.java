@@ -3,7 +3,7 @@ package com.example.demo.Model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,7 +45,7 @@ public class ClientProfile {
 
     // Relationships
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnoreProperties({"client", "applications"})
     private List<Project> projects = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL)

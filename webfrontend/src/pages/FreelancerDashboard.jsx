@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import {
     FiAlertCircle,
     FiArrowRight,
-    FiBriefcase, FiCheckCircle, FiClock, FiStar,
+    FiBriefcase, FiCheckCircle, FiClock,
+    FiStar,
+    FiMessageSquare,
     FiTrendingUp
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
@@ -42,6 +44,7 @@ function FreelancerDashboard() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const [reviewModal, setReviewModal] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -232,7 +235,7 @@ function FreelancerDashboard() {
                       <span className="text-sm font-semibold text-emerald-600">${project.budget}</span>
                     </div>
                     <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
-                    <div className="flex items-center gap-3 mt-3">
+                    <div className="flex items-center gap-3 mt-3 flex-wrap">
                       <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
                         ASSIGNED
                       </span>
@@ -241,6 +244,13 @@ function FreelancerDashboard() {
                           <FiClock size={12} /> Due: {new Date(project.deadline).toLocaleDateString()}
                         </span>
                       )}
+                      {/* Chat button */}
+                      <button
+                        onClick={() => navigate(`/chat/${project.id}`)}
+                        className="flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full hover:bg-emerald-200 transition ml-auto"
+                      >
+                        <FiMessageSquare size={12} /> Chat with Client
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -299,6 +309,31 @@ function FreelancerDashboard() {
           </div>
         </div>
 
+        {/* Completed Projects with Review Prompts */}
+        {dashboard?.completedProjects?.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Completed Projects</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {dashboard.completedProjects.map((project) => (
+                <div key={project.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-gray-900">{project.title}</h3>
+                    <span className="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">COMPLETED</span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">${project.budget}</p>
+                  {/* Prompt to review the client */}
+                  <button
+                    onClick={() => setReviewModal({ project })}
+                    className="mt-3 flex items-center gap-1.5 text-xs text-yellow-600 hover:text-yellow-700 font-medium transition"
+                  >
+                    <FiStar size={12} /> Rate this client
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Profile Summary */}
         {freelancer && (
           <div className="mt-8 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -356,6 +391,19 @@ function FreelancerDashboard() {
           </div>
         )}
       </div>
+
+      {/* Review Modal — freelancer reviews the client after project completion */}
+      {reviewModal && reviewModal.project.client && (
+        <ReviewModal
+          projectId={reviewModal.project.id}
+          projectTitle={reviewModal.project.title}
+          reviewerId={Number(localStorage.getItem("userId"))}
+          clientId={reviewModal.project.client.id}
+          targetName={reviewModal.project.client.clientName || reviewModal.project.client.user?.username || "the client"}
+          onClose={() => setReviewModal(null)}
+          onSubmitted={() => setReviewModal(null)}
+        />
+      )}
     </div>
   );
 }

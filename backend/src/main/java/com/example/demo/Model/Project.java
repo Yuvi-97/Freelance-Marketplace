@@ -6,7 +6,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -39,7 +38,7 @@ public class Project {
 
     @ManyToOne
     @JoinColumn(name = "client_id")
-    @JsonBackReference
+    @JsonIgnoreProperties({"projects", "password"})
     private ClientProfile client;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)

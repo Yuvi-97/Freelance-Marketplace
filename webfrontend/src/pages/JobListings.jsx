@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function JobListings() {
   const [projects, setProjects] = useState([]);
@@ -226,8 +227,17 @@ function JobListings() {
                   </span>
                 </div>
 
-                {/* Company / Client */}
-                <p className="text-sm text-gray-500 mt-1">{proj.clientName}</p>
+                {/* Company / Client — clickable profile link */}
+                {proj.client ? (
+                  <Link
+                    to={`/client/${proj.client.user?.id || proj.client.id}`}
+                    className="text-sm text-indigo-600 hover:underline mt-1 inline-flex items-center gap-1 font-medium"
+                  >
+                    {proj.client.clientName || proj.client.companyName || "View Client Profile"} →
+                  </Link>
+                ) : (
+                  <p className="text-sm text-gray-500 mt-1">{proj.clientName}</p>
+                )}
 
                 {/* Description */}
                 <p className="text-gray-700 mt-3 line-clamp-3">

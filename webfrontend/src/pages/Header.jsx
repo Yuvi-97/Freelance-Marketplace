@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  FiLogOut,
-  FiMenu,
-  FiX,
-  FiUser,
-  FiSettings,
-  FiBell,
-  FiChevronDown,
+  FiBell, FiChevronDown, FiLogOut,
+  FiMenu, FiMessageSquare, FiSettings,
+  FiUser, FiX,
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -14,13 +10,13 @@ function Header() {
   const navigate = useNavigate();
   const [username, setUsername] = useState(localStorage.getItem("username"));
   const [role, setRole] = useState(localStorage.getItem("role"));
+  const [profileUrl, setProfileUrl] = useState(localStorage.getItem("profileUrl"));
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const avatarButtonRef = useRef(null);
 
-  const profileUrl = localStorage.getItem("profileUrl");
-  const userId = localStorage.getItem("userId"); // ensure you store this at login
+  const userId = localStorage.getItem("userId");
 
   // Dynamic profile path based on role
   const profilePath =
@@ -28,12 +24,13 @@ function Header() {
       ? `/freelancer/${userId}`
       : role === "CLIENT"
       ? `/client/${userId}`
-      : "/admin-dashboard"; // fallback for admin or unknown
+      : "/admin-dashboard";
 
   useEffect(() => {
     const handleLogin = () => {
       setUsername(localStorage.getItem("username"));
       setRole(localStorage.getItem("role"));
+      setProfileUrl(localStorage.getItem("profileUrl"));
     };
     window.addEventListener("login", handleLogin);
     return () => window.removeEventListener("login", handleLogin);
@@ -68,6 +65,7 @@ function Header() {
     localStorage.removeItem("userId");
     setUsername(null);
     setRole(null);
+    setProfileUrl(null);
     setDropdownOpen(false);
     navigate("/");
   };
@@ -128,6 +126,13 @@ function Header() {
                 >
                   My Projects
                 </Link>
+                <Link
+                  to="/my-chats"
+                  className="flex items-center gap-1.5 text-gray-200 hover:text-indigo-400 transition pt-2"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <FiMessageSquare size={15} /> Chats
+                </Link>
               </>
             )}
 
@@ -153,6 +158,13 @@ function Header() {
                   onClick={() => setMenuOpen(false)}
                 >
                   My Applications
+                </Link>
+                <Link
+                  to="/my-chats"
+                  className="flex items-center gap-1.5 text-gray-200 hover:text-emerald-400 transition pt-2"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <FiMessageSquare size={15} /> Chats
                 </Link>
               </>
             )}

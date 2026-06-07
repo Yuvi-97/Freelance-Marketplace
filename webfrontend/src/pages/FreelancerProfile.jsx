@@ -1,30 +1,35 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import {
-  FiAward,
-  FiBriefcase,
-  FiDollarSign,
-  FiEdit2,
-  FiGithub,
-  FiGlobe,
-  FiLinkedin,
-  FiMail, FiMapPin,
-  FiSave,
-  FiStar,
-  FiX
+    FiAward, FiBriefcase, FiDollarSign, FiEdit2, FiGithub,
+    FiGlobe, FiLinkedin, FiMail, FiMapPin, FiSave, FiStar, FiX
 } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
-
 const EXPERIENCE_LEVELS = ["BEGINNER", "INTERMEDIATE", "EXPERT"];
 const WORK_TYPES = ["FULL_TIME", "PART_TIME", "CONTRACT", "FREELANCE"];
 
+function StarDisplay({ rating }) {
+  return (
+    <span className="text-yellow-500 font-bold text-sm">
+      {"★".repeat(rating)}{"☆".repeat(5 - rating)}
+    </span>
+  );
+}
+
 function FreelancerProfile() {
+  const { id: paramId } = useParams(); // userId from URL
   const navigate = useNavigate();
+  const loggedInUserId = localStorage.getItem("userId");
+  // isOwnProfile: true when the logged-in user is viewing their own profile
+  const isOwnProfile = paramId === loggedInUserId;
+
   const [freelancer, setFreelancer] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(null);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [completedCount, setCompletedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
@@ -32,20 +37,21 @@ function FreelancerProfile() {
   const [message, setMessage] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
-  const isOwnProfile = true;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
         const headers = { Authorization: token ? `Bearer ${token}` : "" };
 
-        const res = await axios.get(`${API_BASE}/api/freelancers/user/${userId}`, { headers });
+        // Load by userId from URL param
+        const res = await axios.get(`${API_BASE}/api/freelancers/user/${paramId}`, { headers });
         const data = res.data;
         setFreelancer(data);
-        if (data.id) localStorage.setItem("freelancerId", String(data.id));
+
+        // Only store freelancerId in localStorage when viewing own profile
+        if (isOwnProfile && data.id) localStorage.setItem("freelancerId", String(data.id));
 
         setForm({
           name: data.name || "",
@@ -68,15 +74,22 @@ function FreelancerProfile() {
           availableForWork: data.availableForWork ?? true,
         });
 
-        // Fetch reviews and rating
         if (data.id) {
+          // Fetch rating
           try {
             const ratingRes = await axios.get(`${API_BASE}/api/reviews/freelancer/${data.id}/rating`, { headers });
             setAvgRating(ratingRes.data);
           } catch (_) {}
+          // Fetch reviews
           try {
-            const reviewsRes = await axios.get(`${API_BASE}/api/reviews`, { headers });
-            setReviews(reviewsRes.data.filter(r => r.freelancer?.id === data.id));
+            const reviewsRes = await axios.get(`${API_BASE}/api/reviews/freelancer/${data.id}`, { headers });
+            setReviews(reviewsRes.data || []);
+            setTotalReviews((reviewsRes.data || []).length);
+          } catch (_) {}
+          // Completed projects count from dashboard
+          try {
+            const dashRes = await axios.get(`${API_BASE}/api/freelancers/${data.id}/dashboard`, { headers });
+            setCompletedCount(dashRes.data?.completedProjectsCount ?? 0);
           } catch (_) {}
         }
       } catch (err) {
@@ -86,8 +99,8 @@ function FreelancerProfile() {
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    if (paramId) fetchData();
+  }, [paramId, isOwnProfile]);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -106,6 +119,8 @@ function FreelancerProfile() {
       const res = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData);
       const newUrl = res.data.secure_url;
       setFreelancer(prev => ({ ...prev, profileUrl: newUrl }));
+      localStorage.setItem("profileUrl", newUrl);
+      window.dispatchEvent(new Event("login"));
       const token = localStorage.getItem("token");
       await axios.put(`${API_BASE}/api/profile`, { ...form, profileUrl: newUrl }, {
         headers: { Authorization: `Bearer ${token}` },
@@ -131,8 +146,7 @@ function FreelancerProfile() {
       const res = await axios.put(`${API_BASE}/api/profile`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const d = res.data;
-      setFreelancer(prev => ({ ...prev, ...d }));
+      setFreelancer(prev => ({ ...prev, ...res.data }));
       setEditing(false);
       setMessage({ type: "success", text: "Profile updated successfully." });
     } catch (err) {
@@ -155,9 +169,9 @@ function FreelancerProfile() {
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
       <div className="bg-red-50 text-red-600 p-6 rounded-2xl max-w-md w-full shadow-sm">
         <h2 className="text-xl font-bold mb-2">Freelancer Not Found</h2>
-        <p className="mb-6 opacity-80">The profile you're looking for doesn't exist.</p>
-        <button onClick={() => navigate("/")} className="px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition">
-          Back to Home
+        <p className="mb-6 opacity-80">This profile doesn't exist or is unavailable.</p>
+        <button onClick={() => navigate(-1)} className="px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition">
+          Go Back
         </button>
       </div>
     </div>
@@ -169,13 +183,17 @@ function FreelancerProfile() {
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
           <div className="h-36 bg-gradient-to-r from-emerald-600 to-teal-500"></div>
           <div className="px-8 pb-8">
+
             {/* Avatar + Actions */}
             <div className="flex justify-between items-end -mt-16 mb-6 flex-wrap gap-4">
-              <div className="relative group cursor-pointer" onClick={() => isOwnProfile && fileInputRef.current?.click()}>
+              <div
+                className="relative group cursor-pointer"
+                onClick={() => isOwnProfile && fileInputRef.current?.click()}
+              >
                 <img
                   src={freelancer.profileUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(freelancer.name || "F")}&background=d1fae5&color=059669&size=128&bold=true`}
                   alt={freelancer.name}
-                  className={`w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg bg-white ${uploadingImage ? "opacity-50" : ""} ${isOwnProfile ? "group-hover:opacity-80" : ""} transition`}
+                  className={`w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg bg-white transition ${uploadingImage ? "opacity-50" : ""} ${isOwnProfile ? "group-hover:opacity-80" : ""}`}
                 />
                 {isOwnProfile && !uploadingImage && (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/30 rounded-full">
@@ -184,6 +202,7 @@ function FreelancerProfile() {
                 )}
                 <input type="file" className="hidden" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} />
               </div>
+
               {isOwnProfile && (
                 <div className="mb-2 flex gap-3">
                   {!editing ? (
@@ -210,8 +229,24 @@ function FreelancerProfile() {
               </div>
             )}
 
+            {/* Stats bar — visible to everyone */}
+            <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900">{completedCount}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Projects Done</p>
+              </div>
+              <div className="text-center border-x border-gray-200">
+                <p className="text-2xl font-bold text-gray-900">{avgRating ? Number(avgRating).toFixed(1) : "—"}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Avg Rating</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900">{totalReviews}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Reviews</p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              {/* Left Column */}
+              {/* ── Left Column ── */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Name & Headline */}
                 <div>
@@ -228,8 +263,8 @@ function FreelancerProfile() {
                   )}
                 </div>
 
-                {/* Availability Badge */}
-                <div className="flex items-center gap-2">
+                {/* Availability */}
+                <div>
                   {editing ? (
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={f("availableForWork")} onChange={e => setF("availableForWork", e.target.checked)} className="accent-emerald-600" />
@@ -242,7 +277,7 @@ function FreelancerProfile() {
                   )}
                 </div>
 
-                {/* Rate */}
+                {/* Hourly Rate */}
                 <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
                   {!editing ? (
                     <div className="flex items-center gap-3">
@@ -260,29 +295,18 @@ function FreelancerProfile() {
                   )}
                 </div>
 
-                {/* Contact & Info */}
+                {/* Contact */}
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact & Info</p>
-                  <div className="flex items-center gap-3 text-sm text-gray-700">
-                    <FiMail className="text-gray-400 flex-shrink-0" />
-                    <span className="break-all">{freelancer.email || "Not provided"}</span>
-                  </div>
+                  <div className="flex items-center gap-3 text-sm text-gray-700"><FiMail className="text-gray-400 flex-shrink-0" /><span className="break-all">{freelancer.email || "Not provided"}</span></div>
                   {!editing ? (
-                    freelancer.location && (
-                      <div className="flex items-center gap-3 text-sm text-gray-700">
-                        <FiMapPin className="text-gray-400 flex-shrink-0" />
-                        <span>{freelancer.location}</span>
-                      </div>
-                    )
+                    freelancer.location && <div className="flex items-center gap-3 text-sm text-gray-700"><FiMapPin className="text-gray-400 flex-shrink-0" /><span>{freelancer.location}</span></div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <FiMapPin className="text-gray-400 flex-shrink-0" />
-                      <input className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-emerald-500" value={f("location")} onChange={e => setF("location", e.target.value)} placeholder="City, Country" />
-                    </div>
+                    <div className="flex items-center gap-2"><FiMapPin className="text-gray-400 flex-shrink-0" /><input className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-emerald-500" value={f("location")} onChange={e => setF("location", e.target.value)} placeholder="City, Country" /></div>
                   )}
                 </div>
 
-                {/* Social Links */}
+                {/* Links */}
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Links</p>
                   {!editing ? (
@@ -301,21 +325,19 @@ function FreelancerProfile() {
                   )}
                 </div>
 
-                {/* Rating */}
-                {avgRating !== null && (
-                  <div className="bg-yellow-50 rounded-2xl p-4 border border-yellow-100">
-                    <div className="flex items-center gap-2">
-                      <FiStar className="text-yellow-500" size={20} />
-                      <div>
-                        <p className="text-xs text-yellow-700 font-medium">Average Rating</p>
-                        <p className="text-xl font-bold text-yellow-900">{Number(avgRating).toFixed(1)} <span className="text-sm font-medium">/ 5</span></p>
-                      </div>
+                {/* Avg Rating badge */}
+                {avgRating !== null && Number(avgRating) > 0 && (
+                  <div className="bg-yellow-50 rounded-2xl p-4 border border-yellow-100 flex items-center gap-3">
+                    <FiStar className="text-yellow-500" size={20} />
+                    <div>
+                      <p className="text-xs text-yellow-700 font-medium">Average Rating</p>
+                      <p className="text-xl font-bold text-yellow-900">{Number(avgRating).toFixed(1)} <span className="text-sm font-medium">/ 5</span></p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Right Column */}
+              {/* ── Right Column ── */}
               <div className="lg:col-span-2 space-y-6">
                 {/* About */}
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
@@ -331,13 +353,9 @@ function FreelancerProfile() {
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                   <h3 className="text-lg font-bold text-gray-900 mb-3">Skills</h3>
                   {!editing ? (
-                    freelancer.skills ? (
-                      <div className="flex flex-wrap gap-2">
-                        {freelancer.skills.split(",").map((s, i) => s.trim() && (
-                          <span key={i} className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium shadow-sm hover:border-emerald-300 hover:text-emerald-700 transition">{s.trim()}</span>
-                        ))}
-                      </div>
-                    ) : <p className="text-gray-400 italic">No skills listed.</p>
+                    freelancer.skills
+                      ? <div className="flex flex-wrap gap-2">{freelancer.skills.split(",").map((s, i) => s.trim() && <span key={i} className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium shadow-sm hover:border-emerald-300 hover:text-emerald-700 transition">{s.trim()}</span>)}</div>
+                      : <p className="text-gray-400 italic">No skills listed.</p>
                   ) : (
                     <div>
                       <input className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:border-emerald-500" value={f("skills")} onChange={e => setF("skills", e.target.value)} placeholder="React, Node.js, Python... (comma separated)" />
@@ -350,13 +368,9 @@ function FreelancerProfile() {
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                   <h3 className="text-lg font-bold text-gray-900 mb-3">Tech Stack</h3>
                   {!editing ? (
-                    freelancer.techStack ? (
-                      <div className="flex flex-wrap gap-2">
-                        {freelancer.techStack.split(",").map((t, i) => t.trim() && (
-                          <span key={i} className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-xl text-sm font-medium">{t.trim()}</span>
-                        ))}
-                      </div>
-                    ) : <p className="text-gray-400 italic">No tech stack listed.</p>
+                    freelancer.techStack
+                      ? <div className="flex flex-wrap gap-2">{freelancer.techStack.split(",").map((t, i) => t.trim() && <span key={i} className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-xl text-sm font-medium">{t.trim()}</span>)}</div>
+                      : <p className="text-gray-400 italic">No tech stack listed.</p>
                   ) : (
                     <input className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:border-emerald-500" value={f("techStack")} onChange={e => setF("techStack", e.target.value)} placeholder="AWS, Docker, PostgreSQL... (comma separated)" />
                   )}
@@ -367,47 +381,17 @@ function FreelancerProfile() {
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Experience</h3>
                   {!editing ? (
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Level</p>
-                        <p className="text-gray-900 font-semibold mt-1">{freelancer.experienceLevel || "Not set"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Years</p>
-                        <p className="text-gray-900 font-semibold mt-1">{freelancer.yearsOfExperience != null ? `${freelancer.yearsOfExperience} years` : "Not set"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Work Type</p>
-                        <p className="text-gray-900 font-semibold mt-1">{freelancer.preferredWorkType || "Not set"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Languages</p>
-                        <p className="text-gray-900 font-semibold mt-1">{freelancer.languages || "Not set"}</p>
-                      </div>
+                      <div><p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Level</p><p className="text-gray-900 font-semibold mt-1">{freelancer.experienceLevel || "Not set"}</p></div>
+                      <div><p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Years</p><p className="text-gray-900 font-semibold mt-1">{freelancer.yearsOfExperience != null ? `${freelancer.yearsOfExperience} years` : "Not set"}</p></div>
+                      <div><p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Work Type</p><p className="text-gray-900 font-semibold mt-1">{freelancer.preferredWorkType || "Not set"}</p></div>
+                      <div><p className="text-xs text-gray-400 uppercase tracking-wide font-medium">Languages</p><p className="text-gray-900 font-semibold mt-1">{freelancer.languages || "Not set"}</p></div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-gray-500 font-medium">Experience Level</label>
-                        <select className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("experienceLevel")} onChange={e => setF("experienceLevel", e.target.value)}>
-                          <option value="">Select...</option>
-                          {EXPERIENCE_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 font-medium">Years of Experience</label>
-                        <input type="number" min="0" className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("yearsOfExperience")} onChange={e => setF("yearsOfExperience", e.target.value)} />
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 font-medium">Preferred Work Type</label>
-                        <select className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("preferredWorkType")} onChange={e => setF("preferredWorkType", e.target.value)}>
-                          <option value="">Select...</option>
-                          {WORK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 font-medium">Languages Spoken</label>
-                        <input className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("languages")} onChange={e => setF("languages", e.target.value)} placeholder="English, Spanish..." />
-                      </div>
+                      <div><label className="text-xs text-gray-500 font-medium">Experience Level</label><select className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("experienceLevel")} onChange={e => setF("experienceLevel", e.target.value)}><option value="">Select...</option>{EXPERIENCE_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}</select></div>
+                      <div><label className="text-xs text-gray-500 font-medium">Years of Experience</label><input type="number" min="0" className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("yearsOfExperience")} onChange={e => setF("yearsOfExperience", e.target.value)} /></div>
+                      <div><label className="text-xs text-gray-500 font-medium">Preferred Work Type</label><select className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("preferredWorkType")} onChange={e => setF("preferredWorkType", e.target.value)}><option value="">Select...</option>{WORK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
+                      <div><label className="text-xs text-gray-500 font-medium">Languages Spoken</label><input className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-emerald-500" value={f("languages")} onChange={e => setF("languages", e.target.value)} placeholder="English, Spanish..." /></div>
                     </div>
                   )}
                 </div>
@@ -416,19 +400,13 @@ function FreelancerProfile() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                     <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2"><FiAward size={16} /> Education</h3>
-                    {!editing ? (
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{freelancer.education || <span className="italic text-gray-400">Not provided</span>}</p>
-                    ) : (
-                      <textarea rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 resize-y" value={f("education")} onChange={e => setF("education", e.target.value)} placeholder="B.Sc. Computer Science, MIT, 2020" />
-                    )}
+                    {!editing ? <p className="text-sm text-gray-700 whitespace-pre-wrap">{freelancer.education || <span className="italic text-gray-400">Not provided</span>}</p>
+                      : <textarea rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 resize-y" value={f("education")} onChange={e => setF("education", e.target.value)} placeholder="B.Sc. Computer Science, MIT, 2020" />}
                   </div>
                   <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                     <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2"><FiBriefcase size={16} /> Certifications</h3>
-                    {!editing ? (
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{freelancer.certifications || <span className="italic text-gray-400">Not provided</span>}</p>
-                    ) : (
-                      <textarea rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 resize-y" value={f("certifications")} onChange={e => setF("certifications", e.target.value)} placeholder="AWS Certified, Google Cloud..." />
-                    )}
+                    {!editing ? <p className="text-sm text-gray-700 whitespace-pre-wrap">{freelancer.certifications || <span className="italic text-gray-400">Not provided</span>}</p>
+                      : <textarea rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 resize-y" value={f("certifications")} onChange={e => setF("certifications", e.target.value)} placeholder="AWS Certified, Google Cloud..." />}
                   </div>
                 </div>
 
@@ -441,7 +419,7 @@ function FreelancerProfile() {
                         <div key={review.id} className="bg-white rounded-xl p-4 border border-gray-200">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-semibold text-gray-800">{review.reviewer?.username || "Anonymous"}</span>
-                            <span className="text-yellow-500 font-bold">{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</span>
+                            <StarDisplay rating={review.rating} />
                           </div>
                           <p className="text-sm text-gray-600">{review.comment}</p>
                           <p className="text-xs text-gray-400 mt-2">{review.createdAt}</p>

@@ -1,11 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import {
-    FiArrowRight,
-    FiBriefcase, FiCheckCircle,
-    FiClock,
-    FiPlusCircle, FiTrendingUp,
-    FiUsers
+    FiArrowRight, FiBriefcase, FiCheckCircle, FiClock,
+    FiMessageSquare, FiPlusCircle, FiTrendingUp, FiUsers
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -234,8 +231,22 @@ function ClientDashboard() {
                     </div>
                     {project.assignedFreelancer && (
                       <p className="text-xs text-gray-500 mt-2">
-                        Assigned to: <span className="font-medium text-gray-700">{project.assignedFreelancer.name}</span>
+                        Assigned to:{" "}
+                        <Link
+                          to={`/freelancer/${project.assignedFreelancer.user?.id || project.assignedFreelancer.id}`}
+                          className="font-medium text-indigo-600 hover:underline"
+                        >
+                          {project.assignedFreelancer.name}
+                        </Link>
                       </p>
+                    )}
+                    {(project.status === "ASSIGNED" || project.status === "IN_PROGRESS") && (
+                      <button
+                        onClick={() => navigate(`/chat/${project.id}`)}
+                        className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 font-medium transition"
+                      >
+                        <FiMessageSquare size={12} /> Open Chat
+                      </button>
                     )}
                   </div>
                 ))}

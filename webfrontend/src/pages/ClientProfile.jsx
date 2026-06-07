@@ -32,6 +32,9 @@ function ClientProfile() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [avgRating, setAvgRating] = useState(null);
+  const [completedCount, setCompletedCount] = useState(0);
   const fileInputRef = useRef(null);
   const isOwnProfile = id === localStorage.getItem("userId");
 
@@ -56,6 +59,20 @@ function ClientProfile() {
           linkedinUrl: data.linkedinUrl || "",
           twitterUrl: data.twitterUrl || "",
         });
+
+        // Fetch client reviews and rating
+        if (data.id) {
+          try {
+            const ratingRes = await axios.get(`${API_BASE}/api/reviews/client/${data.id}/rating`, { headers });
+            setAvgRating(ratingRes.data);
+          } catch (_) {}
+          try {
+            const reviewsRes = await axios.get(`${API_BASE}/api/reviews/client/${data.id}`, { headers });
+            setReviews(reviewsRes.data || []);
+          } catch (_) {}
+          // Completed projects count
+          setCompletedCount((data.projects || []).filter(p => p.status === "COMPLETED").length);
+        }
       } catch (err) {
         console.error("Failed to fetch client profile", err);
         setClient(null);
@@ -180,6 +197,22 @@ function ClientProfile() {
                 {message.text}
               </div>
             )}
+
+            {/* Stats bar */}
+            <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900">{(client.projects || []).length}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Projects Posted</p>
+              </div>
+              <div className="text-center border-x border-gray-200">
+                <p className="text-2xl font-bold text-gray-900">{completedCount}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Completed</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900">{avgRating && Number(avgRating) > 0 ? Number(avgRating).toFixed(1) : "—"}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Avg Rating</p>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               {/* Left Column */}
@@ -351,6 +384,27 @@ function ClientProfile() {
                 </div>
               </div>
             </div>
+
+            {/* Reviews section */}
+            {reviews.length > 0 && (
+              <div className="mt-8 bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Reviews ({reviews.length})</h3>
+                <div className="space-y-4">
+                  {reviews.slice(0, 5).map(review => (
+                    <div key={review.id} className="bg-white rounded-xl p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-gray-800">{review.reviewer?.username || "Anonymous"}</span>
+                        <span className="text-yellow-500 font-bold text-sm">
+                          {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">{review.comment}</p>
+                      <p className="text-xs text-gray-400 mt-2">{review.createdAt}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

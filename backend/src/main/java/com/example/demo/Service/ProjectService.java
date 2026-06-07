@@ -98,5 +98,25 @@ public class ProjectService {
         return projectRepository.findAll(pageable);
     }
 
+    /**
+     * Mark a project as COMPLETED.
+     * Only the client who owns the project can complete it.
+     * Project must be in ASSIGNED or IN_PROGRESS state.
+     */
+    public Project completeProject(Long projectId, Long clientId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
 
+        if (project.getClient() == null || !project.getClient().getId().equals(clientId)) {
+            throw new RuntimeException("Unauthorized: Only the project owner can complete it");
+        }
+
+        if (project.getStatus() != ProjectStatus.ASSIGNED
+                && project.getStatus() != ProjectStatus.IN_PROGRESS) {
+            throw new RuntimeException("Project must be ASSIGNED or IN_PROGRESS to be completed");
+        }
+
+        project.setStatus(ProjectStatus.COMPLETED);
+        return projectRepository.save(project);
+    }
 }

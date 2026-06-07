@@ -9,10 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.Model.ClientProfile;
 import com.example.demo.Model.Freelancer;
+import com.example.demo.Model.Project;
+import com.example.demo.Model.ProjectStatus;
 import com.example.demo.Model.Review;
 import com.example.demo.Model.User;
 import com.example.demo.Repository.ClientProfileRepository;
 import com.example.demo.Repository.FreelancerRepository;
+import com.example.demo.Repository.ProjectRepository;
 import com.example.demo.Repository.ReviewRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.dto.FreelancerRatingDto;
@@ -28,8 +31,14 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final FreelancerRepository freelancerRepository;
     private final ClientProfileRepository clientProfileRepository;
+    private final ProjectRepository projectRepository;
 
     public Review createReview(ReviewRequest request) {
+        // Prevent duplicate review for same project by same reviewer
+        if (request.getProjectId() != null
+                && reviewRepository.existsByProjectIdAndReviewerId(request.getProjectId(), request.getReviewerId())) {
+            throw new RuntimeException("You have already submitted a review for this project");
+        }
 
         Review review = new Review();
         review.setRating(request.getRating());
@@ -39,6 +48,16 @@ public class ReviewService {
         User reviewer = userRepository.findById(request.getReviewerId())
                 .orElseThrow(() -> new RuntimeException("Reviewer not found"));
         review.setReviewer(reviewer);
+
+        if (request.getProjectId() != null) {
+            Project project = projectRepository.findById(request.getProjectId())
+                    .orElseThrow(() -> new RuntimeException("Project not found"));
+            // Only allow reviews on completed projects
+            if (project.getStatus() != ProjectStatus.COMPLETED) {
+                throw new RuntimeException("Reviews can only be submitted for completed projects");
+            }
+            review.setProject(project);
+        }
 
         if (request.getFreelancerId() != null) {
             Freelancer freelancer = freelancerRepository.findById(request.getFreelancerId())
@@ -57,11 +76,28 @@ public class ReviewService {
 
     public Double getFreelancerRating(Long freelancerId) {
         Double avg = reviewRepository.getAverageRatingForFreelancer(freelancerId);
-        return avg != null ? avg : 0.0;
+        return avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0;
     }
-    
+
+    public Double getClientRating(Long clientId) {
+        Double avg = reviewRepository.getAverageRatingForClient(clientId);
+        return avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0;
+    }
+
     public List<Review> getAllReviews() {
         return reviewRepository.findAll();
+    }
+
+    public List<Review> getReviewsForFreelancer(Long freelancerId) {
+        return reviewRepository.findByFreelancerId(freelancerId);
+    }
+
+    public List<Review> getReviewsForClient(Long clientId) {
+        return reviewRepository.findByClientId(clientId);
+    }
+
+    public boolean hasReviewed(Long projectId, Long reviewerId) {
+        return reviewRepository.existsByProjectIdAndReviewerId(projectId, reviewerId);
     }
 
     public List<FreelancerRatingDto> getTopFreelancers(Pageable pageable) {
